@@ -19,8 +19,14 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
             },
+            borderRadius: {
+                xl2: "var(--radius-xl)",
+                "2xl2": "var(--radius-2xl)",
+            },
             boxShadow: {
-                'soft': '0 2px 10px rgba(0, 0, 0, 0.03)',
+                'soft': 'var(--shadow-sm)',
+                'card': 'var(--shadow-md)',
+                'float': 'var(--shadow-lg)',
                 'hover': '0 20px 40px rgba(0, 0, 0, 0.08)',
             }
         },

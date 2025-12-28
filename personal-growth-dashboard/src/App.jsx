@@ -6,8 +6,9 @@ import DashboardLayout from './layouts/DashboardLayout';
 import LandingPage from './pages/LandingPage';
 import DailyOverview from './pages/DailyOverview';
 import SchedulePage from './pages/SchedulePage';
-import ExtraUpPage from './pages/ExtraUpPage';
+import ExtraUp from './pages/ExtraUp';
 import ChoresPage from './pages/ChoresPage';
+import CommandPalette from './components/CommandPalette';
 
 export default function App() {
   const { currentUser: user, loading } = useAuth();
@@ -22,13 +23,16 @@ export default function App() {
 
   // 3. Authenticated -> Dashboard Layout
   return (
-    <Routes>
-      <Route element={<DashboardLayout />}>
-        <Route path="/" element={<DailyOverview />} />
-        <Route path="/schedule" element={<SchedulePage />} />
-        <Route path="/extra-up" element={<ExtraUpPage />} />
-        <Route path="/chores" element={<ChoresPage />} />
-      </Route>
-    </Routes>
+    <>
+      <CommandPalette />
+      <Routes>
+        <Route element={<DashboardLayout />}>
+          <Route path="/" element={<DailyOverview />} />
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/extra-up" element={<ExtraUp />} />
+          <Route path="/chores" element={<ChoresPage />} />
+        </Route>
+      </Routes>
+    </>
   );
 }

@@ -1,23 +1,15 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
 import FullCalendar from '../components/FullCalendar';
+import CommandKCoachmark from '../components/CommandKCoachmark';
 
-const SchedulePage = () => {
-    const { t } = useTranslation();
-
+export default function SchedulePage() {
     return (
-        <div className="h-screen flex flex-col bg-stone-50">
-            {/* Page Header */}
-            <div className="px-8 py-6 border-b border-stone-200 bg-white">
-                <h1 className="text-3xl font-bold text-stone-900">{t('schedule.title')}</h1>
+        <>
+            <CommandKCoachmark />
+            <div className="h-[calc(100vh-64px)] px-6 py-6">
+                <div className="h-full">
+                    <FullCalendar height="100%" />
+                </div>
             </div>
-
-            {/* Full Calendar - Main Stage */}
-            <div className="flex-1 p-8 overflow-hidden">
-                <FullCalendar height="100%" />
-            </div>
-        </div>
+        </>
     );
-};
-
-export default SchedulePage;
+}

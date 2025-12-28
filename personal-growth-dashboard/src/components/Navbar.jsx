@@ -45,14 +45,15 @@ const Navbar = ({ onMenuClick, onOpenHowie }) => {
                 <nav className="hidden md:flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded-full border border-white/10 mx-auto">
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.path;
+                        const baseClass = "flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300";
+                        const activeClass = "bg-white/10 text-white border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]";
+                        const inactiveClass = "text-white/70 hover:text-white hover:bg-white/5";
+
                         return (
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${isActive
-                                    ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]'
-                                    : 'text-neutral-400 hover:text-white hover:bg-white/10'
-                                    }`}
+                                className={`${baseClass} ${isActive ? activeClass : inactiveClass}`}
                             >
                                 <item.icon size={14} />
                                 {item.label}
@@ -87,6 +88,11 @@ const Navbar = ({ onMenuClick, onOpenHowie }) => {
                         <Sparkles size={16} className="text-black group-hover:rotate-12 transition-transform" />
                         <span className="text-xs font-extrabold uppercase tracking-widest">{t('ask_howie')}</span>
                     </button>
+
+                    <div className="hidden md:flex items-center gap-2 text-xs text-slate-400">
+                        <kbd className="px-2 py-1 rounded bg-slate-800/50 border border-slate-700 font-mono text-[10px]">⌘K</kbd>
+                        <span className="font-semibold">Search</span>
+                    </div>
                 </div>
             </header>
         </>

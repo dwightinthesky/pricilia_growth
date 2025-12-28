@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { storage, STORAGE_KEYS } from "../utils/storage";
-import { fetchUserCalendar } from "../utils/calendarUtils";
+import { eventsSubscribe, eventsGetAll } from "../services/dataClient/eventsClient";
+import { getSchoolEventsForUser } from "../services/dataClient/calendarSourceClient";
 import { normalizeEvents } from "../utils/calendarHelpers";
 
 export default function useUnifiedEvents(user) {
@@ -18,23 +18,7 @@ export default function useUnifiedEvents(user) {
             // A. School Events
             let schoolEvents = [];
             try {
-                const configs = storage.get(STORAGE_KEYS.USER_CONFIG) || [];
-                const userConfig = configs.find((c) => c.id === user.uid);
-
-                if (userConfig && userConfig.calendarSource) {
-                    const rawSchool = await fetchUserCalendar(userConfig);
-
-                    schoolEvents = rawSchool.map((ev) => ({
-                        id: `school-${ev.start}`, // 之後可改成 hash
-                        title: ev.title.split(" - ")[0],
-                        start: ev.start,
-                        end: ev.end,
-                        resource: "School",
-                        location: ev.location || "",
-                        category: "School",
-                        allDay: false,
-                    }));
-                }
+                schoolEvents = await getSchoolEventsForUser(user);
             } catch (err) {
                 console.error("Failed to load school calendar", err);
             }
@@ -66,10 +50,10 @@ export default function useUnifiedEvents(user) {
                 setLoading(false);
             };
 
-            const storedEvents = storage.get(STORAGE_KEYS.EVENTS) || [];
+            const storedEvents = eventsGetAll();
             loadPersonal(storedEvents);
 
-            unsubStorage = storage.subscribe(STORAGE_KEYS.EVENTS, (allEvents) => {
+            unsubStorage = eventsSubscribe((allEvents) => {
                 loadPersonal(allEvents);
             });
         };

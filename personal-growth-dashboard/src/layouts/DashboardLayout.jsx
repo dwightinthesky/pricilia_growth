@@ -3,8 +3,15 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 
+import { useAuth } from '../context/AuthContext';
+import { useHowieAI } from '../hooks/useHowieAI';
+import HowieAIPanel from '../components/HowieAI/HowieAIPanel';
+import HowieAIButton from '../components/HowieAI/HowieAIButton';
+
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { currentUser: user } = useAuth();
+    const howie = useHowieAI(user);
 
     return (
         <div className="min-h-screen bg-[#0f0f0f] text-white selection:bg-[#f4f46a] selection:text-black font-sans">
@@ -20,6 +27,14 @@ const DashboardLayout = () => {
                     <Outlet />
                 </div>
             </main>
+
+            {/* HowieAI */}
+            <HowieAIButton onClick={howie.toggle} />
+            <HowieAIPanel
+                isOpen={howie.isOpen}
+                onClose={howie.close}
+                controller={howie}
+            />
         </div>
     );
 };
