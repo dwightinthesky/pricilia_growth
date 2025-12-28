@@ -17,7 +17,7 @@ export const onRequestPost = async ({ request, env }) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                model: "gpt-4-turbo", // or gpt-4o, using a capable model for JSON mode
+                model: "gpt-4o", // using gpt-4o for better availability and JSON mode support
                 response_format: { type: "json_object" },
                 messages: [
                     {
