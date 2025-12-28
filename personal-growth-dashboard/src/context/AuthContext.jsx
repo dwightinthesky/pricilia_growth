@@ -1,9 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const AuthContext = createContext();
+// Provide a default value to prevent crashes if Provider is missing
+const AuthContext = createContext({
+    currentUser: null,
+    loading: false,
+    login: () => { },
+    logout: () => { }
+});
 
 export const useAuth = () => {
-    return useContext(AuthContext);
+    const context = useContext(AuthContext);
+    // Safety check: ensure we always return an object
+    return context || { currentUser: null, loading: false, login: () => { }, logout: () => { } };
 };
 
 export const AuthProvider = ({ children }) => {
@@ -21,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = (userData) => {
         // Mock login
-        const user = { 
+        const user = {
             uid: 'mock-user-123',
             email: userData.email || 'user@example.com',
             displayName: userData.displayName || 'Mock User',
