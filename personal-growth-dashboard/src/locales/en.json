@@ -1,0 +1,40 @@
+{
+    "common": {
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "platform": "Platform",
+        "preference": "Preference",
+        "settings": "Settings",
+        "assistant": "Assistant",
+        "ask_howie": "Ask Howie",
+        "search_placeholder": "Search for tasks or events...",
+        "logout": "Log Out"
+    },
+    "sidebar": {
+        "overview": "Overview",
+        "schedules": "Schedules",
+        "extra_up": "Extra*up",
+        "chores": "Chores"
+    },
+    "dashboard": {
+        "good_morning": "Good Morning",
+        "good_afternoon": "Good Afternoon",
+        "good_evening": "Good Evening",
+        "subtitle": "Here's what's happening with your growth today.",
+        "new_task": "+ New Task",
+        "add_expense": "Add Expense",
+        "monthly_spend": "Monthly Spend",
+        "tasks_completed": "Tasks Completed",
+        "consistency_score": "Consistency Score",
+        "upcoming_deadlines": "Upcoming Deadlines",
+        "focus_activity": "Focus Activity",
+        "focus_subtitle": "Weekly productivity metrics",
+        "recent_activity": "Recent Activity",
+        "view_all": "View All"
+    },
+    "kpi": {
+        "next_7_days": "Next 7 days"
+    }
+}

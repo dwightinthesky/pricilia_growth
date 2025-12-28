@@ -1,0 +1,40 @@
+{
+    "common": {
+        "confirm": "確認",
+        "cancel": "取消",
+        "save": "儲存",
+        "delete": "刪除",
+        "platform": "平台功能",
+        "preference": "偏好設定",
+        "settings": "設定",
+        "assistant": "AI 助手",
+        "ask_howie": "詢問 Howie",
+        "search_placeholder": "搜尋任務或行程...",
+        "logout": "登出"
+    },
+    "sidebar": {
+        "overview": "總覽",
+        "schedules": "行程表",
+        "extra_up": "Extra*up 目標",
+        "chores": "家務雜事"
+    },
+    "dashboard": {
+        "good_morning": "早安",
+        "good_afternoon": "午安",
+        "good_evening": "晚安",
+        "subtitle": "以下是您今天的成長概況。",
+        "new_task": "+ 新增任務",
+        "add_expense": "新增支出",
+        "monthly_spend": "本月支出",
+        "tasks_completed": "已完成任務",
+        "consistency_score": "一致性分數",
+        "upcoming_deadlines": "即將到期",
+        "focus_activity": "專注活動",
+        "focus_subtitle": "每週生產力指標",
+        "recent_activity": "最近活動",
+        "view_all": "查看全部"
+    },
+    "kpi": {
+        "next_7_days": "未來 7 天"
+    }
+}

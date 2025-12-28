@@ -1,0 +1,14 @@
+{
+  "name": "calendar-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "ical.js": "^1.5.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
