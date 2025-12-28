@@ -7,6 +7,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './context/AuthContext'; // 🔥 Import AuthProvider
 import './i18n';
 
+console.log("🚀 VERSION 3.1 LOADED - Fallback Fixed");
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
