@@ -308,15 +308,15 @@ const DeadlineTimer = () => {
 
                 {/* 🔥 上方間距縮小 mt-6 -> mt-3，內部間距縮小 pt-4 -> pt-3 */}
                 {nextClass && (
-                    <div className="mt-3 flex flex-row items-center gap-6 border-t border-neutral-100 pt-3 w-full">
+                    <div className="mt-3 flex flex-row flex-wrap items-start gap-x-6 gap-y-2 border-t border-neutral-100 pt-3 w-full">
                         <div className="flex items-center text-[11px] text-neutral-500 font-medium uppercase tracking-wide">
-                            <MapPin size={14} className="mr-2 text-neutral-400" />
-                            <span className="truncate max-w-[100px]">{nextClass.location}</span>
+                            <MapPin size={14} className="mr-2 text-neutral-400 shrink-0" />
+                            <span>{nextClass.location}</span>
                         </div>
                         {nextClass.professor && (
                             <div className="flex items-center text-[11px] text-neutral-500 font-medium uppercase tracking-wide">
-                                <User size={14} className="mr-2 text-neutral-400" />
-                                <span className="truncate max-w-[120px]">{nextClass.professor}</span>
+                                <User size={14} className="mr-2 text-neutral-400 shrink-0" />
+                                <span>{nextClass.professor}</span>
                             </div>
                         )}
                     </div>
