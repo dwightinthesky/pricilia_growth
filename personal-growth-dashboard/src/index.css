@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -54,4 +54,643 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* ========================================
+     DESIGN TOKEN SYSTEM
+     ======================================== */
+
+  :root {
+    /* Colors */
+    --cal-brand: #3b82f6;
+    --cal-brand-light: #dbeafe;
+    --cal-brand-subtle: #eff6ff;
+
+    --cal-surface: #ffffff;
+    --cal-surface-subtle: #fafbfc;
+    --cal-surface-hover: #f5f7f9;
+
+    --cal-border: #e5e7eb;
+    --cal-border-hairline: #f3f4f6;
+    --cal-border-strong: #d1d5db;
+
+    --cal-text-primary: #111827;
+    --cal-text-secondary: #6b7280;
+    --cal-text-tertiary: #9ca3af;
+
+    --cal-today-bg: #fef3c7;
+    --cal-today-accent: #f59e0b;
+
+    --cal-now-line: #ef4444;
+
+    /* Event colors */
+    --cal-event-school: #3b82f6;
+    --cal-event-school-bg: #dbeafe;
+    --cal-event-personal: #10b981;
+    --cal-event-personal-bg: #d1fae5;
+
+    /* Spacing */
+    --cal-space-1: 4px;
+    --cal-space-2: 8px;
+    --cal-space-3: 12px;
+    --cal-space-4: 16px;
+    --cal-space-6: 24px;
+
+    /* Radius */
+    --cal-radius-sm: 6px;
+    --cal-radius-md: 8px;
+    --cal-radius-lg: 12px;
+
+    /* Shadows */
+    --cal-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --cal-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --cal-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* ========================================
+     PRODUCT-GRADE CALENDAR - GOCARDLESS/LINEAR INSPIRED
+     ======================================== */
+
+  /* Calendar Container */
+  .rbc-calendar {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cal-surface);
+    border: 1px solid var(--cal-border-hairline);
+    border-radius: var(--cal-radius-lg);
+    overflow: hidden;
+  }
+
+  /* ========================================
+     1. PRODUCT-GRADE HEADER/TOOLBAR
+     ======================================== */
+
+  .rbc-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--cal-space-4) var(--cal-space-6);
+    border-bottom: 1px solid var(--cal-border-hairline);
+    background: var(--cal-surface);
+    gap: var(--cal-space-4);
+  }
+
+  /* Segmented Control Groups */
+  .rbc-btn-group {
+    display: inline-flex;
+    gap: 2px;
+    background: var(--cal-surface-subtle);
+    padding: 2px;
+    border-radius: var(--cal-radius-md);
+    border: 1px solid var(--cal-border-hairline);
+  }
+
+  .rbc-toolbar button {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--cal-text-secondary);
+    border: none;
+    background: transparent;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+  }
+
+  .rbc-toolbar button:hover {
+    background: var(--cal-surface-hover);
+    color: var(--cal-text-primary);
+  }
+
+  .rbc-toolbar button:active,
+  .rbc-toolbar button.rbc-active {
+    background: var(--cal-surface);
+    color: var(--cal-text-primary);
+    box-shadow: var(--cal-shadow-sm);
+  }
+
+  /* Date Label - prominent hierarchy */
+  .rbc-toolbar-label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--cal-text-primary);
+    letter-spacing: -0.02em;
+    flex: 1;
+    text-align: center;
+  }
+
+  /* ========================================
+     2. MINIMAL GRID LINES
+     ======================================== */
+
+  .rbc-month-view {
+    border: none;
+    background: var(--cal-surface);
+  }
+
+  .rbc-month-row {
+    border: none;
+  }
+
+  .rbc-day-bg {
+    border-left: 1px solid var(--cal-border-hairline);
+    border-top: 1px solid var(--cal-border-hairline);
+    transition: background-color 0.15s;
+  }
+
+  .rbc-day-bg:hover {
+    background-color: var(--cal-surface-hover);
+  }
+
+  .rbc-day-bg+.rbc-day-bg {
+    border-left: 1px solid var(--cal-border-hairline);
+  }
+
+  .rbc-off-range-bg {
+    background: var(--cal-surface-subtle);
+  }
+
+  /* Today - Subtle brand highlight */
+  .rbc-today {
+    background: var(--cal-today-bg) !important;
+  }
+
+  /* ========================================
+     3. STICKY HEADER WITH HIERARCHY
+     ======================================== */
+
+  .rbc-header {
+    padding: var(--cal-space-3) var(--cal-space-2);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--cal-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--cal-border);
+    border-left: 1px solid var(--cal-border-hairline);
+    background: var(--cal-surface-subtle);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .rbc-header:first-child {
+    border-left: none;
+  }
+
+  /* Date Numbers */
+  .rbc-date-cell {
+    padding: var(--cal-space-2) var(--cal-space-3);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--cal-text-primary);
+    text-align: right;
+  }
+
+  .rbc-off-range .rbc-date-cell {
+    color: var(--cal-text-tertiary);
+  }
+
+  .rbc-today .rbc-date-cell {
+    color: var(--cal-today-accent);
+    font-weight: 700;
+  }
+
+  /* ========================================
+     4. BRANDED EVENT CARDS
+     ======================================== */
+
+  .rbc-event {
+    position: relative;
+    padding: 6px 10px 6px 14px;
+    border-radius: var(--cal-radius-sm);
+    border: none !important;
+    border-left: 3px solid var(--cal-brand) !important;
+    background: var(--cal-brand-light) !important;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 1px 2px;
+    color: var(--cal-text-primary) !important;
+  }
+
+  .rbc-event:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--cal-shadow-md);
+    background: var(--cal-brand-subtle) !important;
+  }
+
+  /* Event Content Hierarchy */
+  .rbc-event-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .rbc-event-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--cal-text-secondary);
+    opacity: 0.8;
+  }
+
+  /* Selected Event */
+  .rbc-selected {
+    outline: 2px solid var(--cal-brand);
+    outline-offset: 1px;
+  }
+
+  /* ========================================
+     5. WEEK/DAY VIEW TIME GRID
+     ======================================== */
+
+  .rbc-time-gutter {
+    background: var(--cal-surface-subtle);
+    border-right: 1px solid var(--cal-border-hairline);
+    font-weight: 500;
+    font-size: 11px;
+    color: var(--cal-text-tertiary);
+  }
+
+  .rbc-time-slot {
+    border-top: 1px solid var(--cal-border-hairline);
+  }
+
+  /* Zebra stripes for hours (subtle) */
+  .rbc-timeslot-group:nth-child(even) {
+    background: rgba(0, 0, 0, 0.01);
+  }
+
+  .rbc-timeslot-group {
+    border-left: none;
+    min-height: 60px;
+  }
+
+  .rbc-time-content {
+    border-top: 1px solid var(--cal-border);
+  }
+
+  .rbc-time-header-content {
+    border-left: none;
+  }
+
+  .rbc-time-header-gutter {
+    background: var(--cal-surface-subtle);
+  }
+
+  .rbc-day-slot .rbc-event {
+    border: none;
+    border-left: 4px solid var(--cal-brand) !important;
+  }
+
+  /* ========================================
+     6. CURRENT TIME INDICATOR (RED LINE + DOT)
+     ======================================== */
+
+  .rbc-current-time-indicator {
+    background-color: var(--cal-now-line);
+    height: 2px;
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
+  }
+
+  .rbc-current-time-indicator::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
+    background-color: var(--cal-now-line);
+    border-radius: 50%;
+    border: 2px solid var(--cal-surface);
+    box-shadow: 0 0 0 1px var(--cal-now-line);
+  }
+
+  /* ========================================
+     AGENDA VIEW
+     ======================================== */
+
+  .rbc-agenda-view {
+    padding: var(--cal-space-4);
+  }
+
+  .rbc-agenda-view table {
+    border: none;
+  }
+
+  .rbc-agenda-date-cell,
+  .rbc-agenda-time-cell {
+    padding: var(--cal-space-3) var(--cal-space-4);
+    font-weight: 600;
+    color: var(--cal-text-secondary);
+    border-bottom: 1px solid var(--cal-border-hairline);
+  }
+
+  .rbc-agenda-event-cell {
+    padding: var(--cal-space-3) var(--cal-space-4);
+    border-bottom: 1px solid var(--cal-border-hairline);
+  }
+
+  /* Show More Link */
+  .rbc-show-more {
+    color: var(--cal-brand);
+    font-weight: 600;
+    font-size: 12px;
+    padding: var(--cal-space-1) var(--cal-space-2);
+    border-radius: var(--cal-radius-sm);
+    transition: all 0.15s;
+    background: var(--cal-brand-subtle);
+    margin: 2px;
+  }
+
+  .rbc-show-more:hover {
+    background: var(--cal-brand-light);
+  }
+
+  /* Empty state */
+  .rbc-row-segment {
+    padding: var(--cal-space-1);
+  }
+}
+/* ================================
+   Premium react-big-calendar skin
+   ================================ */
+
+/* Base */
+.rbc-calendar {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+.rbc-time-view,
+.rbc-month-view {
+  border: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Remove heavy borders */
+.rbc-time-view,
+.rbc-month-view,
+.rbc-header,
+.rbc-timeslot-group,
+.rbc-time-header-content,
+.rbc-time-content,
+.rbc-day-bg,
+.rbc-month-row,
+.rbc-row,
+.rbc-row-bg,
+.rbc-date-cell,
+.rbc-time-header,
+.rbc-time-gutter {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Header (week/day) */
+.rbc-time-header {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.rbc-header {
+  padding: 10px 8px;
+  font-weight: 700;
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.8);
+}
+
+.rbc-header + .rbc-header {
+  border-left: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* Month header cells */
+.rbc-month-view .rbc-header {
+  padding: 12px 10px;
+}
+
+/* Date numbers */
+.rbc-date-cell {
+  padding: 10px 10px 6px 10px;
+  font-weight: 700;
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.rbc-date-cell > a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rbc-off-range {
+  color: rgba(15, 23, 42, 0.35);
+}
+
+.rbc-off-range-bg {
+  background: rgba(15, 23, 42, 0.02);
+}
+
+/* Time gutter */
+.rbc-time-gutter {
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.rbc-time-gutter .rbc-time-slot {
+  color: rgba(15, 23, 42, 0.5);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Time slots: soften grid */
+.rbc-time-content {
+  border-top: 0;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.rbc-time-slot {
+  border-top: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+/* Subtle zebra for readability (week/day) */
+.rbc-day-slot .rbc-time-slot:nth-child(2n) {
+  background: rgba(15, 23, 42, 0.01);
+}
+
+/* Today highlight (subtle, premium) */
+.rbc-today {
+  background: rgba(59, 130, 246, 0.06) !important;
+}
+
+/* Current time indicator (thin + dot) */
+.rbc-current-time-indicator {
+  height: 1px;
+  background: rgba(239, 68, 68, 0.95);
+}
+
+.rbc-current-time-indicator::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.95);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* Selection */
+.rbc-slot-selection {
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+}
+
+/* Events: make them card-like */
+.rbc-event {
+  border: 0 !important;
+  border-radius: 12px !important;
+  padding: 6px 8px !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.rbc-event:focus {
+  outline: none;
+}
+
+.rbc-event-label {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.rbc-event-content {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* Month view events */
+.rbc-month-view .rbc-event {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10);
+  border-radius: 10px !important;
+}
+
+/* Hover polish */
+.rbc-event:hover {
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+/* "Show more" link */
+.rbc-show-more {
+  color: rgba(15, 23, 42, 0.75);
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.rbc-show-more:hover {
+  background: rgba(15, 23, 42, 0.10);
+}
+
+/* Popup */
+.rbc-overlay {
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+.rbc-overlay-header {
+  font-weight: 800;
+  font-size: 12px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.03);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* Make the calendar feel less "boxed in" inside your card */
+.rbc-time-view,
+.rbc-month-view {
+  border-radius: 18px;
+}
+
+/* Hide default toolbar - we use custom ScheduleToolbar */
+.rbc-toolbar {
+  display: none !important;
+}
+
+/* ================================
+   Force-hide default RBC toolbar
+   (keep only your custom ScheduleToolbar)
+   ================================ */
+
+.rbc-toolbar {
+  display: none !important;
+}
+
+/* Some RBC versions render an empty toolbar wrapper spacing */
+.rbc-toolbar + * {
+  margin-top: 0 !important;
+}
+
+/* Event text: make it look like a card, not a chip */
+.rbc-event,
+.rbc-event:hover {
+  color: rgba(15, 23, 42, 0.92) !important;
+}
+
+.rbc-event-content {
+  font-weight: 800 !important;
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+}
+
+.rbc-event-label {
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  opacity: 0.7 !important;
+}
+
+/* Month view: compact events */
+.rbc-month-view .rbc-event {
+  padding: 4px 6px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.10) !important;
+}
+
+.rbc-month-view .rbc-event-content {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+}
+
+.rbc-month-view .rbc-event-label {
+  display: none !important;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.06) 25%,
+    rgba(15, 23, 42, 0.10) 37%,
+    rgba(15, 23, 42, 0.06) 63%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+  border-radius: 12px;
 }

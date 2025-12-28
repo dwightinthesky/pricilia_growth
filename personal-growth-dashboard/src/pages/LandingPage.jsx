@@ -13,7 +13,7 @@ const LandingPage = () => {
 
     const handleLogin = async () => {
         try {
-            await login(); // Mock Login
+            await login(); // Calls Supabase Google Login
         } catch (error) {
             console.error("Login failed:", error);
         }

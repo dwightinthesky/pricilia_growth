@@ -1,17 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '../utils/supabaseClient';
 
-// Provide a default value to prevent crashes if Provider is missing
 const AuthContext = createContext({
     currentUser: null,
-    loading: false,
+    loading: true,
     login: () => { },
     logout: () => { }
 });
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    // Safety check: ensure we always return an object
-    return context || { currentUser: null, loading: false, login: () => { }, logout: () => { } };
+    return useContext(AuthContext);
 };
 
 export const AuthProvider = ({ children }) => {
@@ -19,34 +17,42 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Mock checking for persisted session
-        const storedUser = localStorage.getItem('mock_user');
-        if (storedUser) {
-            setCurrentUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+        // 1. Check active session
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            setCurrentUser(session?.user || null);
+            setLoading(false);
+        };
+
+        checkSession();
+
+        // 2. Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setCurrentUser(session?.user || null);
+            setLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
-    const login = (userData) => {
-        // Mock login
-        const user = {
-            uid: 'mock-user-123',
-            email: userData.email || 'user@example.com',
-            displayName: userData.displayName || 'Mock User',
-            photoURL: userData.photoURL || null,
-            ...userData
-        };
-        localStorage.setItem('mock_user', JSON.stringify(user));
-        setCurrentUser(user);
+    const login = async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) console.error("Login error:", error.message);
     };
 
-    const logout = () => {
-        localStorage.removeItem('mock_user');
-        setCurrentUser(null);
+    const logout = async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) console.error("Logout error:", error.message);
     };
 
     const value = {
         currentUser,
+        loading,
         login,
         logout
     };
