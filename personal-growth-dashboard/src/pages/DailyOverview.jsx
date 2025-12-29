@@ -13,7 +13,7 @@ import DeadlineTimer from '../components/DeadlineTimer'; // Restored
 import { Sparkles, Home, Bot, Plus, Command, ArrowRight } from 'lucide-react';
 
 export default function DailyOverview() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { currentUser: user } = useAuth();
     const [allEvents, setAllEvents] = useState([]);

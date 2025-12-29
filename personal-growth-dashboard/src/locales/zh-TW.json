@@ -36,5 +36,41 @@
     },
     "kpi": {
         "next_7_days": "未來 7 天"
+    },
+    "overview": {
+        "todayOverview": "今日概覽",
+        "quickActions": {
+            "createEvent": {
+                "title": "建立活動",
+                "subtitle": "行程或截止日期"
+            },
+            "commandK": "按 ⌘K 搜尋"
+        }
+    },
+    "modules": {
+        "extraUp": {
+            "title": "Extra*Up",
+            "description": "一次升級一個習慣。"
+        },
+        "chores": {
+            "title": "家務雜事",
+            "description": "無需費心的家務管理。"
+        },
+        "howie": {
+            "description": "隨意提問，秒速生成計劃。"
+        },
+        "status": {
+            "comingSoon": "即將推出",
+            "inProgress": "開發中",
+            "betaSoon": "Beta 即將上線"
+        },
+        "actions": {
+            "joinWaitlist": "加入候補",
+            "viewRoadmap": "查看路線圖",
+            "notifyMe": "還不是入口"
+        }
+    },
+    "common": {
+        "howieAI": "HowieAI",
+        "confirm": "確認",
     }
-}
