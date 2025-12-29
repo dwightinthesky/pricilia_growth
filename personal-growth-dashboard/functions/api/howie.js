@@ -23,6 +23,7 @@ export const onRequestPost = async ({ request, env }) => {
     const body = await request.json();
     const tone = body?.tone || "calm"; // calm | strict | coach
     const context = body?.context || {};
+    const memory = body?.memory || {};
     const intent = body?.intent || "general";
 
     const system = `
@@ -64,18 +65,20 @@ Rules:
   - strict: direct, no fluff, accountability
   - coach: warm, encouraging, but still actionable
 - Memory Usage:
-  - If a goal is in context.memory.pinnedGoalIds, prioritize recommendations connected to it.
-  - If context.memory.recent has a similar action recently, acknowledge it or suggest the next step rather than repeating.
+  - If a goal is in memory.pinnedGoalIds, prioritize recommendations connected to it.
+  - If memory.recent has a similar action recently, acknowledge it or suggest the next step rather than repeating.
 - Use given context to decide status:
   - If any goal alert=behind => status="behind"
   - If any goal alert=overloaded => status="overloaded"
   - Else status="on_track"
-- If recommending scheduling, include an action:
-  { "type":"schedule_session", "label":"Schedule 90-min session", "payload": { "goalId": "...", "durationMin": 90, "title": "React deep work" } }
+- Action payload rules:
+  - open_schedule payload: { "url": string }
+  - schedule_session payload: { "goalId"?: string, "title": string, "durationMin": number }
+  - create_event payload: { "title": string, "startISO": string, "durationMin": number, "extraUpGoalId"?: string }
 - Always include a fallback open_schedule action too.
 `.trim();
 
-    const userPayload = JSON.stringify({ tone, intent, context });
+    const userPayload = JSON.stringify({ tone, intent, context, memory });
 
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -86,6 +89,8 @@ Rules:
       body: JSON.stringify({
         model: "gpt-4o-mini",
         response_format: { type: "json_object" },
+        temperature: 0.2,
+        max_tokens: 700,
         messages: [
           { role: "system", content: system },
           { role: "user", content: userPayload },
@@ -106,7 +111,9 @@ Rules:
       return new Response(JSON.stringify({ error: "No content from OpenAI" }), { status: 500 });
     }
 
-    const parsed = extractFirstJson(content);
+    let parsed = null;
+    try { parsed = JSON.parse(content); } catch { parsed = null; }
+
     if (!parsed || !isValidHowieResponse(parsed)) {
       // Fallback or detailed error for debugging
       return new Response(JSON.stringify({ error: "Invalid HowieResponse", raw: content }), { status: 500 });
