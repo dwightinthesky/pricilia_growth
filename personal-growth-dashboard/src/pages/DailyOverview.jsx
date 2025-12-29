@@ -8,7 +8,7 @@ import { normalizeEvents } from '../utils/calendarHelpers';
 
 import UpcomingScheduleWidget from '../components/UpcomingScheduleWidget';
 import ComingSoonCard from '../components/ComingSoonCard';
-import ExtraUpGoalsWidget from '../components/ExtraUpGoalsWidget';
+import DeadlineTimer from '../components/DeadlineTimer'; // Restored
 
 import { Sparkles, Home, Bot, Plus, Command, ArrowRight } from 'lucide-react';
 
@@ -84,7 +84,6 @@ export default function DailyOverview() {
     }, [user]);
 
     const today = new Date();
-    const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-12">
@@ -96,7 +95,7 @@ export default function DailyOverview() {
                 <div className="lg:col-span-3 flex flex-col justify-between py-2">
                     <div>
                         <div className="text-[11px] font-extrabold tracking-[0.18em] text-slate-400 uppercase mb-2">
-                            Today's Overview
+                            {t("overview.todayOverview")}
                         </div>
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
                             {today.toLocaleDateString('en-US', { weekday: 'long' })}
@@ -118,8 +117,8 @@ export default function DailyOverview() {
                     <UpcomingScheduleWidget events={allEvents} maxItems={4} />
                 </div>
 
-                {/* 1C: Quick Actions (Right) */}
-                <div className="lg:col-span-3 space-y-3">
+                {/* 1C: Quick Actions (Right) & Countdown */}
+                <div className="lg:col-span-3 space-y-4">
                     <button
                         onClick={() => navigate('/schedule?intent=create')}
                         className="group w-full text-left rounded-2xl2 bg-slate-900 p-5 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-[1px] transition-all"
@@ -130,15 +129,22 @@ export default function DailyOverview() {
                             </div>
                             <ArrowRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
                         </div>
-                        <div className="text-sm font-extrabold text-white">Create event</div>
-                        <div className="text-[11px] font-medium text-white/60">Schedule or deadline</div>
+                        <div className="text-sm font-extrabold text-white">{t("overview.quickActions.createEvent.title")}</div>
+                        <div className="text-[11px] font-medium text-white/60">{t("overview.quickActions.createEvent.subtitle")}</div>
                     </button>
 
                     <div className="rounded-2xl2 bg-white/60 border border-slate-200/50 p-5">
                         <div className="flex items-center gap-3 text-slate-500">
                             <Command size={16} />
-                            <span className="text-xs font-semibold">Press <kbd className="font-sans px-1.5 py-0.5 rounded bg-slate-200/50 text-slate-700 text-[10px] font-bold">⌘K</kbd> to search</span>
+                            <span className="text-xs font-semibold">
+                                {t("overview.quickActions.commandK", "Press ⌘K to search")}
+                            </span>
                         </div>
+                    </div>
+
+                    {/* Restored Countdown */}
+                    <div className="rounded-2xl2 border border-slate-100 bg-white p-1 shadow-sm">
+                        <DeadlineTimer />
                     </div>
                 </div>
             </div>
@@ -146,27 +152,27 @@ export default function DailyOverview() {
             {/* Row 2: Coming Soon Modules */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <ComingSoonCard
-                    title="Extra*Up"
+                    title={t("modules.extraUp.title")}
                     icon={Sparkles}
-                    description="Upgrade one habit at a time."
-                    status="Coming soon"
-                    actionLabel="Join waitlist"
+                    description={t("modules.extraUp.description")}
+                    status={t("modules.status.comingSoon")}
+                    actionLabel={t("modules.actions.joinWaitlist")}
                 />
 
                 <ComingSoonCard
-                    title="Chores"
+                    title={t("modules.chores.title")}
                     icon={Home}
-                    description="Household tasks, without mental load."
-                    status="In progress"
-                    actionLabel="View roadmap"
+                    description={t("modules.chores.description")}
+                    status={t("modules.status.inProgress")}
+                    actionLabel={t("modules.actions.viewRoadmap")}
                 />
 
                 <ComingSoonCard
-                    title="HowieAI"
+                    title={t("common.howieAI")}
                     icon={Bot}
-                    description="Ask anything. Get a plan in seconds."
-                    status="Beta soon"
-                    actionLabel="Notify me"
+                    description={t("modules.howie.description")}
+                    status={t("modules.status.betaSoon")}
+                    actionLabel={t("modules.actions.notifyMe")}
                 />
             </div>
         </div>

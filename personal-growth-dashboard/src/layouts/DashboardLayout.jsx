@@ -14,12 +14,16 @@ const DashboardLayout = () => {
     const howie = useHowieAI(user);
 
     return (
-        <div className="min-h-screen bg-[#0f0f0f] text-white selection:bg-[#f4f46a] selection:text-black font-sans">
+        <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0f0f0f] dark:text-white selection:bg-[#f4f46a] selection:text-black font-sans">
             {/* Top Navbar */}
-            <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
+            <Navbar onMenuClick={() => setIsSidebarOpen(true)} onOpenHowie={howie.toggle} />
 
             {/* Sidebar */}
-            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                onOpenHowie={howie.toggle}
+            />
 
             {/* Main Content Area */}
             <main className="md:pl-64 pt-16 min-h-screen transition-all duration-300">

@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Calendar, Target, Home, Bot, X, Settings } from 'lucide-react';
-import HowieModal from './HowieModal';
-import { useTranslation } from 'react-i18next'; // 🔥 Fix: Import i18n
+import { useTranslation } from 'react-i18next';
 
-const Sidebar = ({ isOpen, onClose }) => {
-    const { t } = useTranslation(); // 🔥 Fix: Initialize t
+const Sidebar = ({ isOpen, onClose, onOpenHowie }) => {
+    const { t } = useTranslation();
     const location = useLocation();
-    const [isHowieOpen, setIsHowieOpen] = useState(false);
 
     const menuItems = [
         { icon: LayoutDashboard, label: t('sidebar.overview'), path: '/' },
@@ -89,7 +87,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 {/* Howie Entry Point */}
                 <div className="mt-auto">
                     <button
-                        onClick={() => setIsHowieOpen(true)}
+                        onClick={() => {
+                            if (onClose) onClose();
+                            if (onOpenHowie) onOpenHowie();
+                        }}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 text-white shadow-lg group hover:border-[#f4f46a]/50 transition-all"
                     >
                         <div className="w-8 h-8 rounded-lg bg-[#f4f46a] flex items-center justify-center text-black">
@@ -102,8 +103,6 @@ const Sidebar = ({ isOpen, onClose }) => {
                     </button>
                 </div>
             </div>
-
-            <HowieModal isOpen={isHowieOpen} onClose={() => setIsHowieOpen(false)} />
         </>
     );
 };

@@ -36,5 +36,41 @@
     },
     "kpi": {
         "next_7_days": "Next 7 days"
+    },
+    "overview": {
+        "todayOverview": "Today's Overview",
+        "quickActions": {
+            "createEvent": {
+                "title": "Create event",
+                "subtitle": "Schedule or deadline"
+            },
+            "commandK": "Press ⌘K to search"
+        }
+    },
+    "modules": {
+        "extraUp": {
+            "title": "Extra*Up",
+            "description": "Upgrade one habit at a time."
+        },
+        "chores": {
+            "title": "Chores",
+            "description": "Household tasks, without mental load."
+        },
+        "howie": {
+            "description": "Ask anything. Get a plan in seconds."
+        },
+        "status": {
+            "comingSoon": "Coming soon",
+            "inProgress": "In progress",
+            "betaSoon": "Beta soon"
+        },
+        "actions": {
+            "joinWaitlist": "Join waitlist",
+            "viewRoadmap": "View roadmap",
+            "notifyMe": "Notify me"
+        }
+    },
+    "common": {
+        "howieAI": "HowieAI",
+        "confirm": "Confirm",
     }
-}
