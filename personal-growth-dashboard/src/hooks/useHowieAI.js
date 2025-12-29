@@ -188,6 +188,8 @@ export function useHowieAI(user) {
         tone,
         setTone,
         askHowie,
-        executeAction
+        executeAction,
+        remaining,
+        limit
     };
 }
