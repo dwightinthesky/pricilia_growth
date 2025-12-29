@@ -6,7 +6,6 @@ import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useHowieAI } from '../hooks/useHowieAI';
 import HowieAIPanel from '../components/HowieAI/HowieAIPanel';
-import HowieAIButton from '../components/HowieAI/HowieAIButton';
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);

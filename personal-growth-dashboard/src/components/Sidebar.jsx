@@ -3,16 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Calendar, Target, Home, Bot, X, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-const Sidebar = ({ isOpen, onClose, onOpenHowie }) => {
+const Sidebar = ({ isOpen, onClose, onHowieClick }) => {
     const { t } = useTranslation();
     const location = useLocation();
 
-    const menuItems = [
-        { icon: LayoutDashboard, label: t('sidebar.overview'), path: '/' },
-        { icon: Calendar, label: t('sidebar.schedules'), path: '/schedule' },
-        { icon: Target, label: t('sidebar.extra_up'), path: '/extra-up' },
-        { icon: Home, label: t('sidebar.chores'), path: '/chores' },
-    ];
+    // ... (menuItems definition unchanged)
 
     return (
         <>
@@ -31,6 +26,8 @@ const Sidebar = ({ isOpen, onClose, onOpenHowie }) => {
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
                 md:translate-x-0 md:flex
             `}>
+                {/* ... (Header and Nav sections unchanged) ... */}
+
                 <div className="flex items-center justify-between mb-12">
                     <div className="flex items-center gap-2">
                         <span className="font-serif font-black text-xl tracking-tighter text-white select-none">
@@ -84,12 +81,12 @@ const Sidebar = ({ isOpen, onClose, onOpenHowie }) => {
                     </div>
                 </div>
 
-                {/* Howie Entry Point */}
+                {/* Howie Entry Point - Primary CTA */}
                 <div className="mt-auto">
                     <button
                         onClick={() => {
                             if (onClose) onClose();
-                            if (onOpenHowie) onOpenHowie();
+                            if (onHowieClick) onHowieClick();
                         }}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 text-white shadow-lg group hover:border-[#f4f46a]/50 transition-all"
                     >

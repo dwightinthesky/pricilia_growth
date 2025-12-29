@@ -81,13 +81,7 @@ const Navbar = ({ onMenuClick, onOpenHowie }) => {
                         {t('logout')}
                     </button>
 
-                    <button
-                        onClick={onOpenHowie}
-                        className="group relative flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#f4f46a] text-black hover:bg-[#e2e255] transition-all shadow-[0_0_20px_rgba(244,244,106,0.3)] active:scale-95"
-                    >
-                        <Sparkles size={16} className="text-black group-hover:rotate-12 transition-transform" />
-                        <span className="text-xs font-extrabold uppercase tracking-widest">{t('ask_howie')}</span>
-                    </button>
+
 
                     <div className="hidden md:flex items-center gap-2 text-xs text-slate-400">
                         <kbd className="px-2 py-1 rounded bg-slate-800/50 border border-slate-700 font-mono text-[10px]">⌘K</kbd>

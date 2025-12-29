@@ -172,7 +172,7 @@ export default function DailyOverview() {
                     icon={Bot}
                     description={t("modules.howie.description")}
                     status={t("modules.status.betaSoon")}
-                    actionLabel={t("modules.actions.notifyMe")}
+                    actionLabel="Learn more"
                 />
             </div>
         </div>
