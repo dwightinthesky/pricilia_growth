@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Sparkles, ArrowRight, Calendar, AlertCircle, Settings2 } from 'lucide-react';
 import { useHowieAI } from '../../hooks/useHowieAI';
+import HowieCards from './HowieCards';
 import { useAuth } from '../../context/AuthContext';
 
 const PRESETS = [
@@ -58,8 +59,8 @@ export default function HowieAIPanel({ isOpen, onClose, controller }) {
                             key={t}
                             onClick={() => setTone(t)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${tone === t
-                                    ? "bg-slate-900 text-white shadow-sm"
-                                    : "bg-white text-slate-500 hover:text-slate-800 border border-slate-200"
+                                ? "bg-slate-900 text-white shadow-sm"
+                                : "bg-white text-slate-500 hover:text-slate-800 border border-slate-200"
                                 }`}
                         >
                             {t}
@@ -152,8 +153,8 @@ export default function HowieAIPanel({ isOpen, onClose, controller }) {
                                                     key={actionIdx}
                                                     onClick={() => executeAction(action)}
                                                     className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold active:scale-95 transition-all ${isPrimary
-                                                            ? "bg-slate-900 text-white hover:bg-slate-800 shadow-md shadow-slate-900/10"
-                                                            : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                                                        ? "bg-slate-900 text-white hover:bg-slate-800 shadow-md shadow-slate-900/10"
+                                                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                                                         }`}
                                                 >
                                                     {action.type === 'schedule_session' ? <Calendar size={14} /> : <ArrowRight size={14} />}
