@@ -31,10 +31,21 @@ export function useHowieUsage() {
         localStorage.setItem(key, JSON.stringify(next));
     }
 
+    function refund() {
+        if (data.count > 0) {
+            const next = {
+                count: Math.max(0, data.count - 1),
+                lastUsedAt: data.lastUsedAt
+            };
+            localStorage.setItem(key, JSON.stringify(next));
+        }
+    }
+
     return {
         remaining,
         exhausted,
         consume,
+        refund,
         limit: DAILY_LIMIT,
     };
 }
