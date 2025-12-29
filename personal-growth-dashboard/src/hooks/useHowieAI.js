@@ -6,6 +6,7 @@ import { findFreeSlot } from '../utils/findFreeSlot';
 import { useNavigate } from 'react-router-dom';
 import { useHowieUsage } from './useHowieUsage';
 import { useHowieMemory } from './useHowieMemory';
+import useSubscription from './useSubscription';
 
 export function useHowieAI(user) {
     const [isOpen, setIsOpen] = useState(false);
@@ -21,8 +22,11 @@ export function useHowieAI(user) {
     const { goals } = useExtraUpGoals(user);
     const navigate = useNavigate();
 
+    // Subscription Limits
+    const { plan } = useSubscription(user);
+
     // Usage Limits
-    const { exhausted, remaining, consume, limit } = useHowieUsage();
+    const { exhausted, remaining, consume, limit } = useHowieUsage(plan?.limits?.howieDaily);
 
     const toggle = () => setIsOpen(prev => !prev);
     const close = () => setIsOpen(false);

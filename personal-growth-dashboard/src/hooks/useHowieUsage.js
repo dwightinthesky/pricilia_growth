@@ -5,8 +5,9 @@ function getTodayKey() {
     return `howie_usage_${today}`;
 }
 
-export function useHowieUsage() {
+export function useHowieUsage(limitOverride) {
     const key = getTodayKey();
+    const limit = Number(limitOverride || DAILY_LIMIT);
 
     // Initialize if not present
     let data = { count: 0 };
@@ -20,7 +21,7 @@ export function useHowieUsage() {
     }
 
     // Calculate remaining
-    const remaining = Math.max(0, DAILY_LIMIT - data.count);
+    const remaining = Math.max(0, limit - data.count);
     const exhausted = remaining === 0;
 
     function consume() {
@@ -46,6 +47,6 @@ export function useHowieUsage() {
         exhausted,
         consume,
         refund,
-        limit: DAILY_LIMIT,
+        limit,
     };
 }

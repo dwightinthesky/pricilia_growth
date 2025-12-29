@@ -10,8 +10,14 @@ import ExtraUp from './pages/ExtraUp';
 import ChoresPage from './pages/ChoresPage';
 import CommandPalette from './components/CommandPalette';
 
+import FinancePage from './pages/FinancePage';
+import PricingPage from './pages/Pricing';
+import BillingSettings from './components/settings/BillingSettings';
+import useSubscription from './hooks/useSubscription';
+
 export default function App() {
   const { currentUser: user, loading } = useAuth();
+  const sub = useSubscription(user);
 
   // 1. Loading State (Black background to prevent flash)
   if (loading) return <div className="min-h-screen bg-[#0f0f0f]"></div>;
@@ -31,6 +37,17 @@ export default function App() {
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/extra-up" element={<ExtraUp />} />
           <Route path="/chores" element={<ChoresPage />} />
+          <Route path="/finance" element={<FinancePage />} />
+          <Route
+            path="/pricing"
+            element={
+              <PricingPage
+                currentPlanId={sub.planId}
+                onSelectPlan={(planId) => sub.setPlan(planId)}
+              />
+            }
+          />
+          <Route path="/settings" element={<BillingSettings />} />
         </Route>
       </Routes>
     </>

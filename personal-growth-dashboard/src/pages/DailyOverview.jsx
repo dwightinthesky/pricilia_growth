@@ -11,7 +11,7 @@ import ComingSoonCard from '../components/ComingSoonCard';
 import ExtraUpGoalsWidget from '../components/ExtraUpGoalsWidget';
 import DeadlineTimer from '../components/DeadlineTimer';
 
-import { Sparkles, Home, Bot, Plus, Command, ArrowRight } from 'lucide-react';
+import { Sparkles, Home, Bot, Plus, Command, ArrowRight, Wallet } from 'lucide-react';
 
 export default function DailyOverview() {
     const { t, i18n } = useTranslation();
@@ -176,11 +176,12 @@ export default function DailyOverview() {
                 />
 
                 <ComingSoonCard
-                    title={tt("common.howieAI", "HowieAI")}
-                    icon={Bot}
-                    description={tt("modules.howie.description", "Ask anything. Get a plan in seconds.")}
-                    status={tt("modules.status.betaSoon", "Beta soon")}
-                    actionLabel={tt("modules.actions.learnMore", "Learn more")}
+                    title="Finance Tracker"
+                    icon={Wallet}
+                    description="Track spending, recurring bills, and monthly cashflow."
+                    status="Beta"
+                    actionLabel="Open Finance"
+                    onAction={() => navigate('/finance')}
                 />
 
                 <ComingSoonCard

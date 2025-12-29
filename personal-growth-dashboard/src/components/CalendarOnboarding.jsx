@@ -74,26 +74,9 @@ const CalendarOnboarding = ({ isOpen, onClose, onSave }) => {
 
             // Store in Local Storage
             await saveToLocal({
-                calendarType: 'url',
+                calendarType: "url",
                 calendarSource: icalUrl,
-                // simplified for local storage, not storing full events object inside user config to avoid bloat, 
-                // but widget logic expects them in user config for syncing. 
-                // Actually widget uses calendarSource to fetch if URL, or parses if file.
-                // The original code stored `calendar: { type, url, events }`.
-                // But `saveToFirestore` was merging data. 
-                // Let's stick to the structure expected by `fetchUserCalendar` in `calendarUtils`?
-                // `fetchUserCalendar` expects `calendarType` and `calendarSource`.
-                // But `UpcomingWidget` passed `docSnap.data()`.
-                // So I should save top-level fields:
-                calendarType: 'url',
-                calendarSource: icalUrl,
-                calendar: { // keeping nested for compatibility if needed, but Utils uses top level
-                    type: 'url',
-                    url: icalUrl,
-                    syncedAt: new Date(),
-                    eventCount: data.count,
-                    events: data.events
-                }
+                calendar: { type: "url", source: icalUrl, syncedAt: new Date(), eventCount: data.count, events: data.events },
             });
 
             onSave && onSave();

@@ -1,0 +1,11 @@
+name = "personal-growth-dashboard"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+# KV Namespace binding for Billing (Uid -> CustomerId)
+# In production, you need to create this namespace and add the ID here:
+# npx wrangler kv:namespace create BILLING_STORE
+# [[kv_namespaces]]
+# binding = "BILLING_STORE"
+# id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # Replace with real ID
+# preview_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"

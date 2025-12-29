@@ -3,7 +3,10 @@ export const STORAGE_KEYS = {
     EVENTS: 'pgd_events',
     CHORES: 'pgd_chores',
     GOALS: 'pgd_goals',
-    USER_CONFIG: 'pgd_user_config'
+    USER_CONFIG: 'pgd_user_config',
+    FINANCE_LEDGER: "FINANCE_LEDGER", // Keep for compatibility if used
+    FINANCE_TXS: "finance_transactions",
+    FINANCE_RECURRING: "finance_recurring",
 };
 
 const dispatchEvent = (key) => {
@@ -45,6 +48,15 @@ export const storage = {
             }
         } catch (e) {
             console.error('Error updating storage', e);
+        }
+    },
+
+    set: (key, value) => {
+        try {
+            localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+            dispatchEvent(key);
+        } catch (e) {
+            console.error('Error setting storage', e);
         }
     },
 

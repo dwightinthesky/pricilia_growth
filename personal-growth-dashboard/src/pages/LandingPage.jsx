@@ -21,6 +21,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import FinanceSection from "../components/FinanceSection";
 
 /**
  * Pricilia(Growth) — Landing Page (Static V3.1)
