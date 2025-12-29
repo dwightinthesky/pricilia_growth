@@ -14,8 +14,8 @@ import DeadlineTimer from '../components/DeadlineTimer';
 import { Sparkles, Home, Bot, Plus, Command, ArrowRight } from 'lucide-react';
 
 export default function DailyOverview() {
-    const { t } = useTranslation();
-    const tt = (key, fallback) => t(key, { defaultValue: fallback }); // ✅ key 沒翻譯時用 fallback，不會顯示 key
+    const { t, i18n } = useTranslation();
+    const tt = (key, fallback) => t(key, { defaultValue: fallback });
     const navigate = useNavigate();
     const { currentUser: user } = useAuth();
     const [allEvents, setAllEvents] = useState([]);
@@ -83,46 +83,51 @@ export default function DailyOverview() {
     const today = new Date();
 
     return (
-        <div className="max-w-6xl mx-auto pb-12">
-            {/* ✅ 一個大 Grid：右側佔兩列，下面卡片會塞到左中空白 */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-flow-row-dense gap-6">
+        <div className="max-w-[1200px] mx-auto pb-10">
 
-                {/* A. Left: Greeting (col 3) */}
-                <section className="lg:col-span-3">
-                    <div className="rounded-2xl bg-white/80 border border-slate-200/70 shadow-sm p-5">
+            {/* 1. Hero Grid Section - Fixed Height (Above the Fold) */}
+            <section
+                className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12"
+                style={{ height: "calc(100vh - 64px - 48px)" }}
+            >
+
+                {/* A. Left (3): Greeting + Goal Stack - min-h-0 for scrolling if needed */}
+                <div className="col-span-12 lg:col-span-3 flex flex-col gap-6 min-h-0">
+                    <div className="shrink-0 rounded-2xl bg-white/80 border border-slate-200/70 shadow-sm p-5">
                         <div className="text-[11px] font-extrabold tracking-[0.18em] text-slate-400 uppercase mb-2">
                             {tt('overview.todayOverview', "Today's Overview")}
                         </div>
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
-                            {today.toLocaleDateString('en-US', { weekday: 'long' })}
+                            {today.toLocaleDateString(i18n.language === 'zh-TW' ? 'zh-TW' : 'en-US', { weekday: 'long' })}
                         </h1>
                         <div className="text-sm font-semibold text-slate-500">
-                            {today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            {today.toLocaleDateString(i18n.language === 'zh-TW' ? 'zh-TW' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                         </div>
                         <div className="mt-6 text-xs font-medium text-slate-400 leading-relaxed">
                             “One habit at a time.”
                         </div>
                     </div>
 
-                    {/* 可選：如果你想塞更多內容，這裡放 goals widget 很剛好 */}
-                    <div className="mt-6">
+                    {/* Fills remaining height in left col */}
+                    <div className="flex-1 min-h-0">
                         <ExtraUpGoalsWidget />
                     </div>
-                </section>
+                </div>
 
-                {/* B. Center: Upcoming (col 6) */}
-                <section className="lg:col-span-6">
-                    {/* 取消死高度，避免產生「被撐高」的錯覺；用 min-h 讓卡看起來穩 */}
-                    <div className="min-h-[360px]">
-                        <UpcomingScheduleWidget events={allEvents} maxItems={4} />
+                {/* B. Center (5): Upcoming Calendar - min-h-0 for internal scroll */}
+                <div className="col-span-12 lg:col-span-5 min-h-0">
+                    {/* H-full to fill column, internal widget handles scroll */}
+                    <div className="h-full">
+                        <UpcomingScheduleWidget events={allEvents} maxItems={20} />
                     </div>
-                </section>
+                </div>
 
-                {/* C. Right: Quick actions + CmdK + DeadlineTimer (col 3) — ✅ row-span-2 */}
-                <aside className="lg:col-span-3 lg:row-span-2 space-y-4">
+                {/* C. Right (4): Actions + Timer - min-h-0 */}
+                <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 min-h-0">
+                    {/* Fixed height items */}
                     <button
                         onClick={() => navigate('/schedule?intent=create')}
-                        className="group w-full text-left rounded-2xl bg-slate-900 p-5 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-[1px] transition-all"
+                        className="shrink-0 group w-full text-left rounded-2xl bg-slate-900 p-5 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-[1px] transition-all"
                     >
                         <div className="flex items-center justify-between mb-3">
                             <div className="p-2 rounded-lg bg-white/10 text-white">
@@ -138,7 +143,7 @@ export default function DailyOverview() {
                         </div>
                     </button>
 
-                    <div className="rounded-2xl bg-white/80 border border-slate-200/70 p-4">
+                    <div className="shrink-0 rounded-2xl bg-white/80 border border-slate-200/70 p-4">
                         <div className="flex items-center gap-3 text-slate-600">
                             <Command size={16} />
                             <span className="text-xs font-semibold">
@@ -153,36 +158,39 @@ export default function DailyOverview() {
                         </div>
                     </div>
 
-                    {/* ✅ DeadlineTimer 放這裡最合理：它高，就讓它吃 row-span-2 */}
-                    <DeadlineTimer />
-                </aside>
+                    {/* Timer fills remaining space and handles its own size */}
+                    <div className="flex-1 min-h-0">
+                        <DeadlineTimer />
+                    </div>
+                </div>
+            </section>
 
-                {/* D. Coming Soon Cards — ✅ 只佔左中 9 欄，填掉空白 */}
-                <section className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <ComingSoonCard
-                        title="Extra*Up"
-                        icon={Sparkles}
-                        description={tt('modules.extraUp.description', "Upgrade one habit at a time.")}
-                        status={tt('modules.status.comingSoon', "Coming soon")}
-                        actionLabel={tt('modules.actions.joinWaitlist', "Join waitlist")}
-                    />
-                    <ComingSoonCard
-                        title="Chores"
-                        icon={Home}
-                        description={tt('modules.chores.description', "Household tasks, without mental load.")}
-                        status={tt('modules.status.inProgress', "In progress")}
-                        actionLabel={tt('modules.actions.viewRoadmap', "View roadmap")}
-                    />
-                    <ComingSoonCard
-                        title="HowieAI"
-                        icon={Bot}
-                        description={tt('modules.howie.description', "Ask anything. Get a plan in seconds.")}
-                        status={tt('modules.status.betaSoon', "Beta soon")}
-                        actionLabel={tt('modules.actions.learnMore', "Learn more")}
-                    />
-                </section>
+            {/* 2. Secondary Content (Scroll to see) */}
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <ComingSoonCard
+                    title={tt("modules.chores.title", "Chores")}
+                    icon={Home}
+                    description={tt("modules.chores.description", "Household tasks, without mental load.")}
+                    status={tt("modules.status.inProgress", "In progress")}
+                    actionLabel={tt("modules.actions.viewRoadmap", "View roadmap")}
+                />
 
-            </div>
+                <ComingSoonCard
+                    title={tt("common.howieAI", "HowieAI")}
+                    icon={Bot}
+                    description={tt("modules.howie.description", "Ask anything. Get a plan in seconds.")}
+                    status={tt("modules.status.betaSoon", "Beta soon")}
+                    actionLabel={tt("modules.actions.learnMore", "Learn more")}
+                />
+
+                <ComingSoonCard
+                    title={tt("modules.focus.title", "Focus Mode")}
+                    icon={Sparkles}
+                    description={tt("modules.focus.description", "Block distractions and deep dive.")}
+                    status={tt("modules.status.planned", "Planned")}
+                    actionLabel={tt("modules.actions.notifyMe", "Notify me")}
+                />
+            </section>
         </div>
     );
 }
