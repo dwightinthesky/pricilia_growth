@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sparkles, ArrowRight, Calendar, AlertCircle } from 'lucide-react';
+import { X, Sparkles, ArrowRight, Calendar, AlertCircle, Settings2 } from 'lucide-react';
 import { useHowieAI } from '../../hooks/useHowieAI';
 import { useAuth } from '../../context/AuthContext';
 
@@ -15,7 +15,9 @@ export default function HowieAIPanel({ isOpen, onClose, controller }) {
         response,
         error,
         askHowie,
-        executeAction
+        executeAction,
+        tone,
+        setTone
     } = controller;
 
     if (!isOpen) return null;
@@ -47,6 +49,22 @@ export default function HowieAIPanel({ isOpen, onClose, controller }) {
                     >
                         <X size={20} />
                     </button>
+                </div>
+
+                {/* Tone Selector */}
+                <div className="px-5 py-3 border-b border-slate-50 bg-slate-50/50 flex gap-2">
+                    {['calm', 'strict', 'coach'].map(t => (
+                        <button
+                            key={t}
+                            onClick={() => setTone(t)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${tone === t
+                                    ? "bg-slate-900 text-white shadow-sm"
+                                    : "bg-white text-slate-500 hover:text-slate-800 border border-slate-200"
+                                }`}
+                        >
+                            {t}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Content */}
@@ -83,7 +101,9 @@ export default function HowieAIPanel({ isOpen, onClose, controller }) {
                     {isLoading && (
                         <div className="flex flex-col items-center justify-center py-12 space-y-4">
                             <div className="w-8 h-8 rounded-full border-2 border-indigo-100 border-t-indigo-600 animate-spin" />
-                            <p className="text-sm font-semibold text-slate-400 animate-pulse">Thinking...</p>
+                            <p className="text-sm font-semibold text-slate-400 animate-pulse">
+                                {tone === 'strict' ? 'Analyzing performance...' : 'Thinking...'}
+                            </p>
                         </div>
                     )}
 
@@ -100,31 +120,47 @@ export default function HowieAIPanel({ isOpen, onClose, controller }) {
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             {/* Summary */}
                             <div className="flex gap-3">
-                                <div className="shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <Sparkles size={14} className="text-indigo-600" />
+                                <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${response.status === 'behind' || response.status === 'overloaded' ? 'bg-amber-100' : 'bg-indigo-100'
+                                    }`}>
+                                    <Sparkles size={14} className={
+                                        response.status === 'behind' || response.status === 'overloaded' ? 'text-amber-600' : 'text-indigo-600'
+                                    } />
                                 </div>
                                 <div className="p-3 bg-white border border-slate-100 rounded-2xl rounded-tl-none shadow-sm text-sm font-medium text-slate-700 leading-relaxed">
                                     {response.summary}
                                 </div>
                             </div>
 
-                            {/* Cards */}
-                            {response.cards?.map((card, idx) => (
+                            {/* Cards (Recommendations) */}
+                            {response.recommendations?.map((card, idx) => (
                                 <div key={idx} className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm">
                                     <h3 className="font-extrabold text-slate-900 mb-1">{card.title}</h3>
-                                    <p className="text-xs text-slate-500 mb-4 font-medium">{card.why}</p>
+                                    <p className="text-xs text-slate-500 mb-2 font-medium leading-relaxed">{card.why}</p>
+
+                                    {card.impact && (
+                                        <div className="mb-4 flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 uppercase tracking-wide bg-indigo-50 w-fit px-2 py-1 rounded-md">
+                                            <Sparkles size={10} strokeWidth={3} />
+                                            <span>Impact: {card.impact}</span>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
-                                        {card.actions?.map((action, actionIdx) => (
-                                            <button
-                                                key={actionIdx}
-                                                onClick={() => executeAction(action)}
-                                                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 active:scale-95 transition-all"
-                                            >
-                                                {action.type === 'create_event' ? <Calendar size={14} /> : <ArrowRight size={14} />}
-                                                {action.label}
-                                            </button>
-                                        ))}
+                                        {card.actions?.map((action, actionIdx) => {
+                                            const isPrimary = action.type === 'schedule_session' || action.type === 'create_event';
+                                            return (
+                                                <button
+                                                    key={actionIdx}
+                                                    onClick={() => executeAction(action)}
+                                                    className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold active:scale-95 transition-all ${isPrimary
+                                                            ? "bg-slate-900 text-white hover:bg-slate-800 shadow-md shadow-slate-900/10"
+                                                            : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
+                                                        }`}
+                                                >
+                                                    {action.type === 'schedule_session' ? <Calendar size={14} /> : <ArrowRight size={14} />}
+                                                    {action.label}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}
