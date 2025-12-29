@@ -8,23 +8,23 @@ import { normalizeEvents } from '../utils/calendarHelpers';
 
 import UpcomingScheduleWidget from '../components/UpcomingScheduleWidget';
 import ComingSoonCard from '../components/ComingSoonCard';
-import DeadlineTimer from '../components/DeadlineTimer'; // Restored
+import ExtraUpGoalsWidget from '../components/ExtraUpGoalsWidget';
+import DeadlineTimer from '../components/DeadlineTimer';
 
 import { Sparkles, Home, Bot, Plus, Command, ArrowRight } from 'lucide-react';
 
 export default function DailyOverview() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
+    const tt = (key, fallback) => t(key, { defaultValue: fallback }); // ✅ key 沒翻譯時用 fallback，不會顯示 key
     const navigate = useNavigate();
     const { currentUser: user } = useAuth();
     const [allEvents, setAllEvents] = useState([]);
 
     useEffect(() => {
         if (!user) return;
-
         let unsubStorage = () => { };
 
         const loadData = async () => {
-            // A. School Events
             let schoolEvents = [];
             try {
                 const configs = storage.get(STORAGE_KEYS.USER_CONFIG);
@@ -47,14 +47,12 @@ export default function DailyOverview() {
                 console.error("Failed to load school calendar", err);
             }
 
-            // B. Personal Events
             const loadPersonalEvents = (personalData) => {
-                const personalEvents = personalData
+                const personalEvents = (personalData || [])
                     .filter(ev => ev.userId === user.uid)
                     .map(data => {
                         const startDate = new Date(data.start);
                         const endDate = new Date(startDate.getTime() + (data.duration || 60) * 60000);
-
                         return {
                             id: data.id,
                             title: data.title,
@@ -71,8 +69,7 @@ export default function DailyOverview() {
                 setAllEvents(normalizeEvents(combined));
             };
 
-            const storedEvents = storage.get(STORAGE_KEYS.EVENTS);
-            loadPersonalEvents(storedEvents);
+            loadPersonalEvents(storage.get(STORAGE_KEYS.EVENTS));
 
             unsubStorage = storage.subscribe(STORAGE_KEYS.EVENTS, (allEvs) => {
                 loadPersonalEvents(allEvs);
@@ -86,20 +83,15 @@ export default function DailyOverview() {
     const today = new Date();
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 pb-12">
-            {/* DEBUG BAR */}
-            <div className="p-6 bg-red-500 text-white font-bold text-center rounded-xl mb-6">
-                OVERVIEW V2 LOADED
-            </div>
+        <div className="max-w-6xl mx-auto pb-12">
+            {/* ✅ 一個大 Grid：右側佔兩列，下面卡片會塞到左中空白 */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-flow-row-dense gap-6">
 
-            {/* Row 1: Hero Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-                {/* 1A: Quick Greeting & Date (Left) */}
-                <div className="lg:col-span-3 flex flex-col justify-between py-2">
-                    <div>
+                {/* A. Left: Greeting (col 3) */}
+                <section className="lg:col-span-3">
+                    <div className="rounded-2xl bg-white/80 border border-slate-200/70 shadow-sm p-5">
                         <div className="text-[11px] font-extrabold tracking-[0.18em] text-slate-400 uppercase mb-2">
-                            {t("overview.todayOverview")}
+                            {tt('overview.todayOverview', "Today's Overview")}
                         </div>
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
                             {today.toLocaleDateString('en-US', { weekday: 'long' })}
@@ -107,25 +99,30 @@ export default function DailyOverview() {
                         <div className="text-sm font-semibold text-slate-500">
                             {today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                         </div>
-                    </div>
-
-                    <div className="hidden lg:block">
-                        <div className="text-xs font-medium text-slate-400 leading-relaxed">
-                            "One habit at a time."
+                        <div className="mt-6 text-xs font-medium text-slate-400 leading-relaxed">
+                            “One habit at a time.”
                         </div>
                     </div>
-                </div>
 
-                {/* 1B: Main Upcoming Widget (Center - Hero) */}
-                <div className="lg:col-span-6 h-[400px]">
-                    <UpcomingScheduleWidget events={allEvents} maxItems={4} />
-                </div>
+                    {/* 可選：如果你想塞更多內容，這裡放 goals widget 很剛好 */}
+                    <div className="mt-6">
+                        <ExtraUpGoalsWidget />
+                    </div>
+                </section>
 
-                {/* 1C: Quick Actions (Right) & Countdown */}
-                <div className="lg:col-span-3 space-y-4">
+                {/* B. Center: Upcoming (col 6) */}
+                <section className="lg:col-span-6">
+                    {/* 取消死高度，避免產生「被撐高」的錯覺；用 min-h 讓卡看起來穩 */}
+                    <div className="min-h-[360px]">
+                        <UpcomingScheduleWidget events={allEvents} maxItems={4} />
+                    </div>
+                </section>
+
+                {/* C. Right: Quick actions + CmdK + DeadlineTimer (col 3) — ✅ row-span-2 */}
+                <aside className="lg:col-span-3 lg:row-span-2 space-y-4">
                     <button
                         onClick={() => navigate('/schedule?intent=create')}
-                        className="group w-full text-left rounded-2xl2 bg-slate-900 p-5 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-[1px] transition-all"
+                        className="group w-full text-left rounded-2xl bg-slate-900 p-5 shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-[1px] transition-all"
                     >
                         <div className="flex items-center justify-between mb-3">
                             <div className="p-2 rounded-lg bg-white/10 text-white">
@@ -133,53 +130,59 @@ export default function DailyOverview() {
                             </div>
                             <ArrowRight size={16} className="text-white/40 group-hover:translate-x-1 transition-transform" />
                         </div>
-                        <div className="text-sm font-extrabold text-white">{t("overview.quickActions.createEvent.title")}</div>
-                        <div className="text-[11px] font-medium text-white/60">{t("overview.quickActions.createEvent.subtitle")}</div>
+                        <div className="text-sm font-extrabold text-white">
+                            {tt('overview.quickActions.createEvent.title', "Create event")}
+                        </div>
+                        <div className="text-[11px] font-medium text-white/60">
+                            {tt('overview.quickActions.createEvent.subtitle', "Schedule or deadline")}
+                        </div>
                     </button>
 
-                    <div className="rounded-2xl2 bg-white/60 border border-slate-200/50 p-5">
-                        <div className="flex items-center gap-3 text-slate-500">
+                    <div className="rounded-2xl bg-white/80 border border-slate-200/70 p-4">
+                        <div className="flex items-center gap-3 text-slate-600">
                             <Command size={16} />
                             <span className="text-xs font-semibold">
-                                {t("overview.quickActions.commandK", "Press ⌘K to search")}
+                                {tt('overview.quickActions.commandHint', "Press")}
+                                {" "}
+                                <kbd className="font-sans px-1.5 py-0.5 rounded bg-slate-200/70 text-slate-800 text-[10px] font-bold">
+                                    ⌘K
+                                </kbd>
+                                {" "}
+                                {tt('overview.quickActions.commandHintEnd', "to search")}
                             </span>
                         </div>
                     </div>
 
-                    {/* Restored Countdown */}
-                    <div className="rounded-2xl2 border border-slate-100 bg-white p-1 shadow-sm">
-                        <DeadlineTimer />
-                    </div>
-                </div>
-            </div>
+                    {/* ✅ DeadlineTimer 放這裡最合理：它高，就讓它吃 row-span-2 */}
+                    <DeadlineTimer />
+                </aside>
 
-            {/* Row 2: Coming Soon Modules */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <ComingSoonCard
-                    title={t("modules.extraUp.title")}
-                    icon={Sparkles}
-                    description={t("modules.extraUp.description")}
-                    status={t("modules.status.comingSoon")}
-                    actionLabel={t("modules.actions.joinWaitlist")}
-                />
+                {/* D. Coming Soon Cards — ✅ 只佔左中 9 欄，填掉空白 */}
+                <section className="lg:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <ComingSoonCard
+                        title="Extra*Up"
+                        icon={Sparkles}
+                        description={tt('modules.extraUp.description', "Upgrade one habit at a time.")}
+                        status={tt('modules.status.comingSoon', "Coming soon")}
+                        actionLabel={tt('modules.actions.joinWaitlist', "Join waitlist")}
+                    />
+                    <ComingSoonCard
+                        title="Chores"
+                        icon={Home}
+                        description={tt('modules.chores.description', "Household tasks, without mental load.")}
+                        status={tt('modules.status.inProgress', "In progress")}
+                        actionLabel={tt('modules.actions.viewRoadmap', "View roadmap")}
+                    />
+                    <ComingSoonCard
+                        title="HowieAI"
+                        icon={Bot}
+                        description={tt('modules.howie.description', "Ask anything. Get a plan in seconds.")}
+                        status={tt('modules.status.betaSoon', "Beta soon")}
+                        actionLabel={tt('modules.actions.learnMore', "Learn more")}
+                    />
+                </section>
 
-                <ComingSoonCard
-                    title={t("modules.chores.title")}
-                    icon={Home}
-                    description={t("modules.chores.description")}
-                    status={t("modules.status.inProgress")}
-                    actionLabel={t("modules.actions.viewRoadmap")}
-                />
-
-                <ComingSoonCard
-                    title={t("common.howieAI")}
-                    icon={Bot}
-                    description={t("modules.howie.description")}
-                    status={t("modules.status.betaSoon")}
-                    actionLabel="Learn more"
-                />
             </div>
         </div>
     );
 }
-
