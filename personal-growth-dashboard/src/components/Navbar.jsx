@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next'; // 引入翻譯 Hook
 import LanguageModal from './LanguageModal'; // 🔥 引入彈窗組件
 
-const Navbar = ({ onMenuClick, onOpenHowie }) => {
+const Navbar = ({ onMenuClick }) => {
     const location = useLocation();
     const { t } = useTranslation(); // 使用翻譯功能
     const { logout } = useAuth();

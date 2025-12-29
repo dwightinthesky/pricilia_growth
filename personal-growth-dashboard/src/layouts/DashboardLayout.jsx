@@ -21,7 +21,7 @@ const DashboardLayout = () => {
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
-                onOpenHowie={howie.toggle}
+                onHowieClick={howie.toggle}
             />
 
             {/* Main Content Area */}
@@ -31,8 +31,6 @@ const DashboardLayout = () => {
                 </div>
             </main>
 
-            {/* HowieAI */}
-            <HowieAIButton onClick={howie.toggle} />
             <HowieAIPanel
                 isOpen={howie.isOpen}
                 onClose={howie.close}
