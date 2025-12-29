@@ -4,32 +4,51 @@ import useExtraUpGoals from './useExtraUpGoals';
 import { eventsCreate } from '../services/dataClient/eventsClient';
 import { findFreeSlot } from '../utils/findFreeSlot';
 import { useNavigate } from 'react-router-dom';
+import { useHowieUsage } from './useHowieUsage';
+import { useHowieMemory } from './useHowieMemory';
 
 export function useHowieAI(user) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [response, setResponse] = useState(null);
     const [error, setError] = useState(null);
-    const [tone, setTone] = useState("calm"); // calm | strict | coach
+
+    // Memory Integration
+    const { memory, setTone: saveTone, pushRecent, pinGoal } = useHowieMemory();
+    const [tone, setToneState] = useState(memory.tone || "calm");
 
     const { events } = useUnifiedEvents(user);
     const { goals } = useExtraUpGoals(user);
     const navigate = useNavigate();
 
+    // Usage Limits
+    const { exhausted, remaining, consume, limit } = useHowieUsage();
+
     const toggle = () => setIsOpen(prev => !prev);
     const close = () => setIsOpen(false);
 
+    // Sync tone change to memory
+    const setTone = (newTone) => {
+        setToneState(newTone);
+        saveTone(newTone);
+    };
+
     const askHowie = async (intent = "Plan my week") => {
+        if (exhausted) {
+            setError("HOWIE_LIMIT_REACHED");
+            return;
+        }
+
         setIsLoading(true);
         setError(null);
         setResponse(null);
 
+        consume();
+
         try {
-            // Build Context
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
 
-            // Filter upcoming events (next 7 days) to save tokens
             const upcomingEvents = (events || [])
                 .filter(e => new Date(e.end) > now)
                 .slice(0, 30) // cap at 30 events
@@ -41,7 +60,6 @@ export function useHowieAI(user) {
                     extraUpGoalId: e.extraUpGoalId
                 }));
 
-            // Simplify goals
             const simpleGoals = (goals || []).map(g => ({
                 id: g.id,
                 title: g.title,
@@ -59,6 +77,11 @@ export function useHowieAI(user) {
                     startOfDay,
                     upcomingEvents,
                     goals: simpleGoals
+                },
+                memory: {
+                    preferred: memory.preferred,
+                    pinnedGoalIds: memory.pinnedGoalIds,
+                    recent: memory.recent
                 }
             };
 
@@ -90,6 +113,13 @@ export function useHowieAI(user) {
 
     const executeAction = async (action) => {
         if (!action) return;
+
+        // Memory: Record action
+        pushRecent({ type: action.type, label: action.label, payload: action.payload });
+
+        // Memory: Pin goal if involved
+        if (action.payload?.goalId) pinGoal(action.payload.goalId);
+        if (action.payload?.extraUpGoalId) pinGoal(action.payload.extraUpGoalId);
 
         try {
             if (action.type === 'open_schedule') {
@@ -190,6 +220,7 @@ export function useHowieAI(user) {
         askHowie,
         executeAction,
         remaining,
-        limit
+        limit,
+        memory // Export memory
     };
 }
