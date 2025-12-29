@@ -7,7 +7,12 @@ const Sidebar = ({ isOpen, onClose, onHowieClick }) => {
     const { t } = useTranslation();
     const location = useLocation();
 
-    // ... (menuItems definition unchanged)
+    const menuItems = [
+        { icon: LayoutDashboard, label: t('sidebar.overview'), path: '/' },
+        { icon: Calendar, label: t('sidebar.schedules'), path: '/schedule' },
+        { icon: Target, label: t('sidebar.extra_up'), path: '/extra-up' },
+        { icon: Home, label: t('sidebar.chores'), path: '/chores' },
+    ];
 
     return (
         <>
