@@ -17,7 +17,14 @@ export const storage = {
     get: (key) => {
         try {
             const data = localStorage.getItem(key);
-            return data ? JSON.parse(data) : [];
+            if (!data) return [];
+
+            try {
+                return JSON.parse(data);
+            } catch (parseError) {
+                // If parse fails (e.g. raw string "pro"), return the raw value
+                return data;
+            }
         } catch (e) {
             console.error('Error reading from storage', e);
             return [];
@@ -27,9 +34,11 @@ export const storage = {
     add: (key, item) => {
         try {
             const items = storage.get(key);
+            // Safety measure: if items isn't an array (e.g. raw string data), force it to array
+            const safeItems = Array.isArray(items) ? items : [];
             const newItem = { ...item, id: Date.now().toString() };
-            items.push(newItem);
-            localStorage.setItem(key, JSON.stringify(items));
+            safeItems.push(newItem);
+            localStorage.setItem(key, JSON.stringify(safeItems));
             dispatchEvent(key);
             return newItem;
         } catch (e) {
@@ -53,7 +62,8 @@ export const storage = {
 
     set: (key, value) => {
         try {
-            localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+            // Always stringify to ensure consistent JSON format, even for strings
+            localStorage.setItem(key, JSON.stringify(value));
             dispatchEvent(key);
         } catch (e) {
             console.error('Error setting storage', e);
