@@ -87,6 +87,10 @@ export default function DailyOverview() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-12">
+            {/* DEBUG BAR */}
+            <div className="p-6 bg-red-500 text-white font-bold text-center rounded-xl mb-6">
+                OVERVIEW V2 LOADED
+            </div>
 
             {/* Row 1: Hero Section */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
