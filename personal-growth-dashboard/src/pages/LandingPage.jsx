@@ -1,246 +1,958 @@
-import React from "react";
-import { ArrowRight, Calendar, Sparkles, Bot, Wallet, Clock, Command } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+    ArrowRight,
+    Check,
+    Command,
+    Calendar,
+    Sparkles,
+    Timer,
+    Bot,
+    CreditCard,
+    Shield,
+    Lock,
+    Zap,
+    LineChart,
+    Bell,
+    Globe,
+    Menu,
+    X,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-export default function LandingPage() {
-    const { login } = useAuth();
+/**
+ * Pricilia(Growth) — Landing Page (Static V3.1)
+ * Self-contained version with internal UI components.
+ */
 
+// --- UTILS ---
+function cn(...inputs) {
+    return twMerge(clsx(inputs));
+}
+
+function useLockBodyScroll(locked) {
+    useEffect(() => {
+        if (!locked) return;
+        const original = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = original;
+        };
+    }, [locked]);
+}
+
+// --- UI COMPONENTS ---
+const Button = React.forwardRef(({ className, variant = "primary", size = "default", ...props }, ref) => {
+    const variants = {
+        primary: "bg-white text-black hover:bg-white/90",
+        secondary: "bg-white/10 text-white hover:bg-white/15 border border-white/10",
+        ghost: "hover:bg-white/10 text-white",
+        black: "bg-black text-white hover:bg-black/90",
+        yellow: "bg-[#f4f46a] text-black hover:bg-[#f4f46a]/90",
+    };
+    const sizes = {
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-md px-3",
+        lg: "h-11 rounded-md px-8",
+        icon: "h-10 w-10",
+    };
     return (
-        <div className="bg-black text-white font-sans">
+        <button
+            ref={ref}
+            className={cn(
+                "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                variants[variant] || variants.primary,
+                sizes[size] || sizes.default,
+                className
+            )}
+            {...props}
+        />
+    );
+});
+Button.displayName = "Button";
 
-            {/* ===== NAVBAR ===== */}
-            <header className="fixed top-0 inset-x-0 z-50 bg-black/70 backdrop-blur border-b border-white/5">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="font-serif font-black text-xl">
-                        Pricilia<span className="text-[#f4f46a]">(Growth)</span>
-                    </div>
-                    <nav className="hidden md:flex gap-8 text-sm text-white/70">
-                        <a href="#product" className="hover:text-white transition-colors">Product</a>
-                        <a href="#method" className="hover:text-white transition-colors">Methodology</a>
-                        <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-                    </nav>
-                    <div className="flex gap-3">
-                        <button onClick={login} className="text-sm text-white/70 hover:text-white transition-colors">Log in</button>
-                        <button onClick={login} className="px-4 py-2 rounded-full bg-white text-black text-sm font-bold hover:bg-neutral-200 transition-colors">
-                            Sign up
-                        </button>
-                    </div>
-                </div>
-            </header>
+const Card = React.forwardRef(({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("rounded-xl border bg-card text-card-foreground shadow-sm", className)} {...props} />
+));
+Card.displayName = "Card";
 
-            {/* ===== HERO ===== */}
-            <section className="pt-40 pb-32 px-6">
-                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
-                    <div>
-                        <span className="inline-block mb-6 px-4 py-1 rounded-full border border-[#f4f46a]/30 text-[#f4f46a] text-xs font-bold tracking-widest">
-                            V3.1 NOW AVAILABLE
-                        </span>
+const CardContent = React.forwardRef(({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("p-6", className)} {...props} />
+));
+CardContent.displayName = "CardContent";
 
-                        <h1 className="text-5xl md:text-6xl font-serif font-black leading-tight">
-                            The operating system<br />
-                            for <span className="text-[#f4f46a]">high achievers</span>.
-                        </h1>
+function Pill({ children, className }) {
+    return (
+        <span
+            className={cn(
+                "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
+                "bg-white/5 border-white/10 text-white/80",
+                className
+            )}
+        >
+            {children}
+        </span>
+    );
+}
 
-                        <p className="mt-6 text-white/60 max-w-xl">
-                            Schedule, goals, deadlines, and money — unified into one intelligent dashboard.
-                            Built for students with real workloads and real ambitions.
-                        </p>
-
-                        <div className="mt-10 flex gap-4">
-                            <button onClick={login} className="px-8 py-4 rounded-full bg-[#f4f46a] text-black font-bold flex items-center gap-2 hover:bg-[#e2e255] transition-colors">
-                                Start for free <ArrowRight size={16} />
-                            </button>
-                            <button className="px-8 py-4 rounded-full border border-white/20 text-white hover:bg-white/5 transition-colors">
-                                Watch demo
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* HERO MOCK */}
-                    <div className="relative">
-                        {/* 4 Cards Stack Effect from previous design (Simulated or kept simple as per user code) */}
-                        {/* User gave a simple mock in the code block, sticking to it or enhancing slightly? User said "HERO MOCK" div. I will implement what they provided. */}
-                        <div className="rounded-3xl bg-neutral-900 p-6 shadow-xl border border-white/10 relative z-10">
-                            <div className="text-xs text-white/40 mb-3 uppercase font-bold tracking-wider">Upcoming</div>
-                            <div className="text-lg font-bold">Managerial Accounting</div>
-                            <div className="text-sm text-white/60 mt-1 flex items-center gap-2">
-                                <Clock size={14} /> Today · 14:00 · Amphithéâtre
+function Section({ id, eyebrow, title, highlight, subtitle, children, className }) {
+    return (
+        <section id={id} className={cn("relative py-16 md:py-24", className)}>
+            <div className="mx-auto w-full max-w-6xl px-5 md:px-8">
+                {(eyebrow || title) && (
+                    <div className="mb-10 md:mb-14">
+                        {eyebrow && (
+                            <div className="mb-3">
+                                <Pill className="bg-white/10 border-white/10 text-white/80">{eyebrow}</Pill>
                             </div>
+                        )}
+                        {title && (
+                            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white">
+                                {title} {highlight && <span className="text-[#f4f46a]">{highlight}</span>}
+                            </h2>
+                        )}
+                        {subtitle && <p className="mt-4 max-w-2xl text-base md:text-lg text-white/60">{subtitle}</p>}
+                    </div>
+                )}
+
+                {children}
+            </div>
+        </section>
+    );
+}
+
+function NavLink({ href, children }) {
+    return (
+        <a
+            href={href}
+            className={cn(
+                "text-sm font-semibold text-white/70 hover:text-white transition-colors",
+                "px-3 py-2 rounded-full hover:bg-white/5"
+            )}
+        >
+            {children}
+        </a>
+    );
+}
+
+function DemoCard({ icon: Icon, label, title, lines = 2, accent = false, className, children }) {
+    return (
+        <Card
+            className={cn(
+                "rounded-[2rem] border",
+                accent
+                    ? "bg-[#f4f46a] text-black border-black/10"
+                    : "bg-white/5 text-white border-white/10",
+                "shadow-2xl",
+                className
+            )}
+        >
+            <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                    <div className={cn("h-10 w-10 rounded-2xl flex items-center justify-center", accent ? "bg-black/10" : "bg-white/10")}>
+                        <Icon className={cn("h-5 w-5", accent ? "text-black" : "text-white")} />
+                    </div>
+                    {label && (
+                        <span className={cn("text-xs font-bold tracking-widest uppercase", accent ? "text-black/60" : "text-white/50")}>
+                            {label}
+                        </span>
+                    )}
+                </div>
+                <div className="mt-5">
+                    <div className={cn("text-lg font-extrabold", accent ? "text-black" : "text-white")}>{title}</div>
+                    {children ? (
+                        <div className={cn("mt-3", accent ? "text-black/70" : "text-white/60")}>{children}</div>
+                    ) : (
+                        <div className="mt-3 space-y-2">
+                            {Array.from({ length: lines }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        "h-3 rounded-full",
+                                        accent ? "bg-black/10" : "bg-white/10",
+                                        i === 0 ? "w-4/5" : "w-3/5"
+                                    )}
+                                />
+                            ))}
                         </div>
-
-                        {/* Decoration */}
-                        <div className="absolute top-4 -right-4 w-full h-full bg-neutral-800 rounded-3xl -z-10 opacity-50"></div>
-                    </div>
+                    )}
                 </div>
-            </section>
+            </CardContent>
+        </Card>
+    );
+}
 
-            {/* ===== PROBLEM ===== */}
-            <section className="py-32 bg-neutral-950 px-6">
-                <div className="max-w-5xl mx-auto text-center">
-                    <h2 className="text-4xl font-serif font-black">
-                        Your life isn’t messy.<br />Your tools are.
-                    </h2>
-                    <p className="mt-6 text-white/50 text-lg">
-                        Calendars everywhere. Goals without rhythm. Money leaking quietly every month.
-                    </p>
-                </div>
-            </section>
-
-            {/* ===== FEATURES ===== */}
-            <section id="product" className="py-32 px-6">
-                <div className="max-w-7xl mx-auto grid gap-24">
-
-                    {/* Smart Sync */}
-                    <Feature
-                        icon={Calendar}
-                        title="Smart Schedule Sync"
-                        description="School iCal and personal events normalized into one clean timeline."
-                        bullets={[
-                            "University calendar auto-sync",
-                            "School + Personal merged seamlessly",
-                            "Always up to date"
-                        ]}
-                    />
-
-                    {/* Command Palette */}
-                    <Feature
-                        icon={Command}
-                        title="Command Palette (⌘K)"
-                        description="Search, navigate, and create without breaking focus."
-                        bullets={[
-                            "Jump to any event or date",
-                            "Create events instantly",
-                            "Keyboard-first workflow"
-                        ]}
-                    />
-
-                    {/* ExtraUp */}
-                    <Feature
-                        icon={Sparkles}
-                        title="Extra*Up Goals"
-                        description="Turn long-term ambitions into weekly rhythm."
-                        bullets={[
-                            "Weekly commitment tracking",
-                            "Overload & behind alerts",
-                            "Certs, exams, projects"
-                        ]}
-                    />
-
-                    {/* Deadline */}
-                    <Feature
-                        icon={Clock}
-                        title="Deadline & Next Class Timer"
-                        description="Deadlines you can feel. Time until your next class."
-                        bullets={[
-                            "Custom countdowns",
-                            "Auto-detected next class",
-                            "Location & professor extraction"
-                        ]}
-                    />
-
-                    {/* Finance */}
-                    <Feature
-                        icon={Wallet}
-                        title="Finance Tracker"
-                        description="Manual input. Recurring-first. No spreadsheets."
-                        bullets={[
-                            "Recurring bills & subscriptions",
-                            "Upcoming charges preview",
-                            "Monthly spending overview"
-                        ]}
-                        highlight
-                    />
-
-                    {/* Howie */}
-                    <Feature
-                        icon={Bot}
-                        title="Howie AI"
-                        description="Not a chatbot. An action engine."
-                        bullets={[
-                            "Reads your schedule & goals",
-                            "Detects overload automatically",
-                            "Creates events with one click"
-                        ]}
-                    />
-
-                </div>
-            </section>
-
-            {/* ===== CTA ===== */}
-            <section className="py-40 bg-gradient-to-b from-black to-neutral-900 text-center px-6">
-                <h2 className="text-5xl font-serif font-black">
-                    Ready to upgrade your life?
-                </h2>
-                <p className="mt-6 text-white/50 text-lg">
-                    Free for students. No credit card required.
-                </p>
-                <div className="mt-10">
-                    <button onClick={login} className="px-10 py-4 rounded-full bg-[#f4f46a] text-black font-bold hover:bg-[#e2e255] transition-colors">
-                        Start for free
-                    </button>
-                </div>
-            </section>
-
-            {/* ===== FOOTER ===== */}
-            <footer className="py-20 px-6 bg-black border-t border-white/5">
-                <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 text-sm text-white/50">
-                    <div>
-                        <div className="font-serif font-black text-white mb-3 text-xl">
-                            Pricilia<span className="text-[#f4f46a]">(Growth)</span>
-                        </div>
-                        <p>Life OS for students and high achievers.</p>
-                    </div>
-                    <div>
-                        <div className="text-white font-bold mb-3">Product</div>
-                        <ul className="space-y-2">
-                            <li>Daily Overview</li>
-                            <li>Howie AI</li>
-                            <li>Extra*Up Goals</li>
-                            <li>Finance Tracker</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <div className="text-white font-bold mb-3">Company</div>
-                        <ul className="space-y-2">
-                            <li>About</li>
-                            <li>Blog</li>
-                            <li>Careers</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <div className="text-white font-bold mb-3">Legal</div>
-                        <ul className="space-y-2">
-                            <li>Privacy</li>
-                            <li>Terms</li>
-                            <li>Security</li>
-                        </ul>
-                    </div>
-                </div>
-            </footer>
-
+function GlassPanel({ className, children }) {
+    return (
+        <div
+            className={cn(
+                "rounded-[2.25rem] border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl",
+                className
+            )}
+        >
+            {children}
         </div>
     );
 }
 
-/* ===== FEATURE BLOCK ===== */
-function Feature({ icon: Icon, title, description, bullets, highlight }) {
+function CommandKDemo({ open, onClose }) {
+    useLockBodyScroll(open);
+
+    const [q, setQ] = useState("standup");
+    const results = useMemo(() => {
+        const all = [
+            { type: "event", title: "Weekly Standup", hint: "Dec 29 · 09:00", action: "Focus in Day view" },
+            { type: "event", title: "React deep work", hint: "Dec 29 · 08:00", action: "Focus in Day view" },
+            { type: "action", title: "Create event", hint: "Schedule or deadline", action: "Open create" },
+            { type: "page", title: "Finance Tracker", hint: "Recurring bills", action: "Open page" },
+        ];
+        const qq = q.trim().toLowerCase();
+        if (!qq) return all;
+        return all.filter((r) => (r.title + " " + r.hint).toLowerCase().includes(qq)).slice(0, 5);
+    }, [q]);
+
     return (
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-6 ${highlight ? "bg-[#f4f46a] text-black" : "bg-white/10 text-white"}`}>
-                    <Icon size={22} />
+        <AnimatePresence>
+            {open && (
+                <motion.div
+                    className="fixed inset-0 z-[60]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                >
+                    <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+
+                    <motion.div
+                        className="absolute left-1/2 top-20 w-[92vw] max-w-2xl -translate-x-1/2"
+                        initial={{ y: 20, opacity: 0, scale: 0.98 }}
+                        animate={{ y: 0, opacity: 1, scale: 1 }}
+                        exit={{ y: 16, opacity: 0, scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                    >
+                        <div className="rounded-[1.5rem] border border-white/10 bg-[#0f0f0f] shadow-2xl overflow-hidden">
+                            <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+                                <div className="h-9 w-9 rounded-xl bg-white/10 flex items-center justify-center">
+                                    <Command className="h-4 w-4 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="text-xs font-bold tracking-widest uppercase text-white/50">Command Palette</div>
+                                    <div className="text-sm font-semibold text-white">Search events, goals, pages</div>
+                                </div>
+                                <button
+                                    onClick={onClose}
+                                    className="h-9 w-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center"
+                                    aria-label="Close"
+                                >
+                                    <X className="h-4 w-4 text-white/70" />
+                                </button>
+                            </div>
+
+                            <div className="p-5">
+                                <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                                    <span className="text-white/40 text-sm">⌘</span>
+                                    <input
+                                        value={q}
+                                        onChange={(e) => setQ(e.target.value)}
+                                        className="flex-1 bg-transparent outline-none text-white placeholder:text-white/30"
+                                        placeholder="Type to search…"
+                                        autoFocus
+                                    />
+                                    <span className="text-xs font-semibold text-white/40">Enter</span>
+                                </div>
+
+                                <div className="mt-4 space-y-2">
+                                    {results.map((r, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={onClose}
+                                            className="w-full text-left rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-3 transition"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="text-sm font-bold text-white">{r.title}</div>
+                                                    <div className="text-xs text-white/50 mt-0.5">{r.hint}</div>
+                                                </div>
+                                                <div className="text-xs font-semibold text-white/60">{r.action}</div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="mt-5 text-xs text-white/40">
+                                    Tip: Press <span className="font-mono text-white/70">⌘K</span> anywhere.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-3 text-center text-xs text-white/40">
+                            This is a UI demo for landing. Wire it to your real command palette later.
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+}
+
+function FeatureGrid() {
+    const features = [
+        {
+            icon: Calendar,
+            title: "Smart Sync",
+            desc: "Connect your university iCal once. School + Personal events unified in one timeline.",
+            bullets: ["Normalized tags", "Always up to date", "Clean schedule view"],
+        },
+        {
+            icon: Command,
+            title: "Command ⌘K",
+            desc: "Search events, goals, and pages. Jump to Day view and focus instantly.",
+            bullets: ["Find anything", "Create events fast", "Keyboard-first flow"],
+        },
+        {
+            icon: Sparkles,
+            title: "Extra*Up Goals",
+            desc: "Long-term goals with weekly rhythm. Get alerts when you're behind or overloaded.",
+            bullets: ["Weekly commitment", "Progress tracking", "Rhythm alerts"],
+        },
+        {
+            icon: Timer,
+            title: "Deadline Timer",
+            desc: "Countdown for your next milestone + next class countdown from your calendar.",
+            bullets: ["Fast edits", "Location extraction", "Always visible"],
+        },
+        {
+            icon: Bot,
+            title: "HowieAI",
+            desc: "Not a chatbot. An agent that schedules sessions and creates events.",
+            bullets: ["Context-aware", "Action buttons", "Weekly planning"],
+        },
+        {
+            icon: CreditCard,
+            title: "Finance Tracker",
+            desc: "Manual input + recurring bills. See what's coming and what's draining your month.",
+            bullets: ["Recurring (weekly/monthly)", "Upcoming charges", "Budget alerts"],
+        },
+    ];
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f, i) => (
+                <motion.div
+                    key={f.title}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.5, delay: i * 0.04 }}
+                >
+                    <Card className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl h-full">
+                        <CardContent className="p-6 h-full flex flex-col">
+                            <div className="flex items-center gap-3">
+                                <div className="h-11 w-11 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                                    <f.icon className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <div className="text-lg font-extrabold text-white">{f.title}</div>
+                                    <div className="text-sm text-white/60 leading-tight">{f.desc}</div>
+                                </div>
+                            </div>
+
+                            <div className="mt-5 grid grid-cols-1 gap-2 mt-auto pt-4">
+                                {f.bullets.map((b) => (
+                                    <div key={b} className="flex items-center gap-2 text-sm text-white/70">
+                                        <span className="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                            <Check className="h-3 w-3 text-white/80" />
+                                        </span>
+                                        <span>{b}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            ))}
+        </div>
+    );
+}
+
+function Pricing() {
+    const { login } = useAuth();
+
+    const tiers = [
+        {
+            name: "Free",
+            price: "$0",
+            note: "For getting started",
+            features: ["Smart Sync (basic)", "Schedules", "Deadline Timer", "Command ⌘K (basic search)"],
+            cta: "Start for free",
+            highlight: false,
+        },
+        {
+            name: "Student Pro",
+            price: "$6",
+            note: "per month",
+            features: [
+                "HowieAI actions",
+                "Finance Tracker (manual + recurring)",
+                "Extra*Up rhythm alerts",
+                "Advanced insights",
+                "Priority roadmap access",
+            ],
+            cta: "Get Student Pro",
+            highlight: true,
+        },
+    ];
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {tiers.map((t) => (
+                <Card
+                    key={t.name}
+                    className={cn(
+                        "rounded-[2rem] border shadow-2xl",
+                        t.highlight ? "bg-[#f4f46a] text-black border-black/10" : "bg-white/5 text-white border-white/10"
+                    )}
+                >
+                    <CardContent className="p-7 h-full flex flex-col">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className={cn("text-lg font-black", t.highlight ? "text-black" : "text-white")}>{t.name}</div>
+                                <div className={cn("mt-1 text-sm", t.highlight ? "text-black/60" : "text-white/60")}>{t.note}</div>
+                            </div>
+                            <div className={cn("text-3xl font-black", t.highlight ? "text-black" : "text-white")}>{t.price}</div>
+                        </div>
+
+                        <div className="mt-6 space-y-2 mb-8">
+                            {t.features.map((f) => (
+                                <div key={f} className={cn("flex items-center gap-2 text-sm", t.highlight ? "text-black/80" : "text-white/70")}>
+                                    <Check className={cn("h-4 w-4", t.highlight ? "text-black" : "text-white/80")} />
+                                    <span>{f}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-auto">
+                            <Button
+                                onClick={() => login()}
+                                className={cn(
+                                    "w-full rounded-2xl h-12 font-extrabold text-base",
+                                    t.highlight ? "bg-black text-white hover:bg-black/90" : "bg-white text-black hover:bg-white/90"
+                                )}
+                            >
+                                {t.cta}
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                            <div className={cn("mt-3 text-xs text-center", t.highlight ? "text-black/60" : "text-white/40")}>
+                                Student discount available · Cancel anytime
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    );
+}
+
+function FAQ() {
+    const faqs = [
+        {
+            q: "How does recurring billing work in Finance Tracker?",
+            a: "Add a recurring item (weekly/monthly/yearly) with amount and next charge date. Pricilia surfaces upcoming charges so surprises disappear.",
+        },
+        {
+            q: "Can I use Pricilia without connecting my university calendar?",
+            a: "Yes. You can manually create events and still use goals, timers, ⌘K search, and Finance Tracker. Smart Sync is optional.",
+        },
+        {
+            q: "What does ⌘K search include?",
+            a: "It searches across events, goals, and pages. You can jump straight into Day view and focus an event.",
+        },
+        {
+            q: "Is HowieAI just a chatbot?",
+            a: "No. Howie returns actionable plans with buttons like create event, schedule session, and open schedule views.",
+        },
+        {
+            q: "Do you support reminders?",
+            a: "You can add reminders for recurring bills and key deadlines. Notifications can expand as the roadmap progresses.",
+        },
+        {
+            q: "How do usage limits work for HowieAI?",
+            a: "Set a weekly quota per user (e.g., 20 asks/week) to control costs and keep the assistant focused.",
+        },
+        {
+            q: "Can I export my data later?",
+            a: "Export/import is planned so you can back up events, goals, and finance entries.",
+        },
+        {
+            q: "Do you sell or track user data?",
+            a: "No. Privacy is a core principle: your data is yours.",
+        },
+    ];
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {faqs.map((f, idx) => (
+                <Card key={idx} className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
+                    <CardContent className="p-6">
+                        <div className="text-base font-extrabold text-white">{f.q}</div>
+                        <div className="mt-2 text-sm text-white/60">{f.a}</div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    );
+}
+
+function Footer() {
+    return (
+        <footer className="border-t border-white/10 bg-black">
+            <div className="mx-auto w-full max-w-6xl px-5 md:px-8 py-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+                    <div>
+                        <div className="font-serif font-black text-xl text-white tracking-tight select-none">
+                            Pricilia(Growth)
+                            <span className="ml-1 align-top text-[10px] font-sans font-bold text-[#f4f46a]">™</span>
+                        </div>
+                        <p className="mt-3 text-sm text-white/50">
+                            The all-in-one operating system for students and high achievers.
+                        </p>
+                    </div>
+
+                    <div>
+                        <div className="text-sm font-extrabold text-white">Product</div>
+                        <div className="mt-3 space-y-2 text-sm text-white/50">
+                            <a className="block hover:text-white" href="#overview">Daily Overview</a>
+                            <a className="block hover:text-white" href="#howie">Howie AI</a>
+                            <a className="block hover:text-white" href="#goals">Extra*Up Goals</a>
+                            <a className="block hover:text-white" href="#finance">Finance Tracker</a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="text-sm font-extrabold text-white">Company</div>
+                        <div className="mt-3 space-y-2 text-sm text-white/50">
+                            <a className="block hover:text-white" href="#">About</a>
+                            <a className="block hover:text-white" href="#">Blog</a>
+                            <a className="block hover:text-white" href="#">Careers</a>
+                            <a className="block hover:text-white" href="#">Contact</a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="text-sm font-extrabold text-white">Legal</div>
+                        <div className="mt-3 space-y-2 text-sm text-white/50">
+                            <a className="block hover:text-white" href="#">Privacy Policy</a>
+                            <a className="block hover:text-white" href="#">Terms</a>
+                            <a className="block hover:text-white" href="#">Security</a>
+                        </div>
+                    </div>
                 </div>
-                <h3 className="text-3xl font-serif font-black">{title}</h3>
-                <p className="mt-4 text-white/60 max-w-lg text-lg leading-relaxed">{description}</p>
-                <ul className="mt-6 space-y-3 text-white/70 font-medium">
-                    {bullets.map(b => <li key={b}>• {b}</li>)}
-                </ul>
+
+                <div className="mt-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="text-xs text-white/40">© {new Date().getFullYear()} Pricilia(Growth). All rights reserved.</div>
+                    <div className="flex items-center gap-2 text-xs text-white/40">
+                        <Shield className="h-4 w-4" />
+                        <span>Private by default</span>
+                        <span className="mx-1">·</span>
+                        <Lock className="h-4 w-4" />
+                        <span>No tracking</span>
+                    </div>
+                </div>
             </div>
-            {/* Mock UI Placeholder */}
-            <div className="rounded-3xl bg-[#111] h-80 shadow-2xl border border-white/5 flex items-center justify-center relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <Icon size={64} className="text-white/10 group-hover:text-white/20 transition-colors duration-500" />
-            </div>
+        </footer>
+    );
+}
+
+// --- MAIN PAGE ---
+export default function LandingPage() {
+    const [demoOpen, setDemoOpen] = useState(false);
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
+    const { login } = useAuth();
+
+    const handleLogin = async () => {
+        try {
+            await login();
+        } catch (e) {
+            console.error("Login failed", e);
+        }
+    };
+
+    const nav = [
+        { label: "Product", href: "#product" },
+        { label: "Methodology", href: "#workflow" },
+        { label: "Pricing", href: "#pricing" },
+    ];
+
+    return (
+        <div className="min-h-screen bg-black text-white font-sans selection:bg-[#f4f46a] selection:text-black">
+            <CommandKDemo open={demoOpen} onClose={() => setDemoOpen(false)} />
+
+            <header className="sticky top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur-xl">
+                <div className="mx-auto w-full max-w-6xl px-5 md:px-8 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <a href="#" className="font-serif font-black text-xl tracking-tight select-none">
+                            Pricilia(Growth)
+                            <span className="ml-1 align-top text-[10px] font-sans font-bold text-[#f4f46a]">™</span>
+                        </a>
+                    </div>
+
+                    <nav className="hidden md:flex items-center gap-1">
+                        {nav.map((n) => (
+                            <NavLink key={n.href} href={n.href}>
+                                {n.label}
+                            </NavLink>
+                        ))}
+                    </nav>
+
+                    <div className="hidden md:flex items-center gap-3">
+                        <button
+                            onClick={() => setDemoOpen(true)}
+                            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white/80 hover:bg-white/10 transition-colors"
+                        >
+                            <Command className="h-4 w-4" />
+                            ⌘K Demo
+                        </button>
+                        <Button onClick={handleLogin} variant="ghost" className="rounded-full text-white/80 hover:text-white hover:bg-white/5">
+                            Log in
+                        </Button>
+                        <Button onClick={handleLogin} className="rounded-full bg-white text-black hover:bg-white/90 font-extrabold">Sign up</Button>
+                        <button
+                            className="h-9 w-9 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                            aria-label="Language"
+                            title="Language"
+                        >
+                            <Globe className="h-4 w-4 text-white/70" />
+                        </button>
+                    </div>
+
+                    <div className="md:hidden flex items-center gap-2">
+                        <button
+                            onClick={() => setDemoOpen(true)}
+                            className="h-10 w-10 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center"
+                            aria-label="Command demo"
+                        >
+                            <Command className="h-4 w-4 text-white/80" />
+                        </button>
+                        <button
+                            onClick={() => setMobileNavOpen((v) => !v)}
+                            className="h-10 w-10 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center"
+                            aria-label="Menu"
+                        >
+                            {mobileNavOpen ? <X className="h-4 w-4 text-white/80" /> : <Menu className="h-4 w-4 text-white/80" />}
+                        </button>
+                    </div>
+                </div>
+
+                <AnimatePresence>
+                    {mobileNavOpen && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="md:hidden border-t border-white/10 overflow-hidden"
+                        >
+                            <div className="mx-auto w-full max-w-6xl px-5 py-4 flex flex-col gap-2">
+                                {nav.map((n) => (
+                                    <a
+                                        key={n.href}
+                                        href={n.href}
+                                        onClick={() => setMobileNavOpen(false)}
+                                        className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/80"
+                                    >
+                                        {n.label}
+                                    </a>
+                                ))}
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <Button onClick={handleLogin} variant="secondary" className="rounded-xl">Log in</Button>
+                                    <Button onClick={handleLogin} className="rounded-xl bg-white text-black hover:bg-white/90 font-extrabold">Sign up</Button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </header>
+
+            <section className="relative overflow-hidden">
+                <div className="absolute inset-0">
+                    <div className="absolute -top-28 left-1/2 h-[520px] w-[980px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
+                    <div className="absolute -bottom-40 left-[10%] h-[420px] w-[420px] rounded-full bg-[#f4f46a]/20 blur-3xl opacity-50" />
+                </div>
+
+                <div className="relative mx-auto w-full max-w-6xl px-5 md:px-8 pt-14 md:pt-20 pb-16 md:pb-24">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                        <div className="lg:col-span-6">
+                            <Pill className="bg-white/10 border-white/10 text-white/80">
+                                <span className="h-2 w-2 rounded-full bg-[#f4f46a]" /> V3.1 — Smart Sync + ⌘K + Finance
+                            </Pill>
+
+                            <h1 className="mt-6 text-5xl md:text-7xl font-black tracking-tight leading-[0.95]">
+                                The operating system
+                                <br />
+                                for <span className="text-[#f4f46a]">high achievers</span>.
+                            </h1>
+
+                            <p className="mt-6 text-base md:text-lg text-white/60 max-w-xl">
+                                Stop juggling calendars, notes, and spreadsheets. Pricilia merges your university schedule, personal events,
+                                long-term goals, and recurring expenses into one dashboard — with an AI agent that takes action.
+                            </p>
+
+                            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                                <Button onClick={handleLogin} className="rounded-full h-12 px-7 bg-[#f4f46a] text-black hover:bg-[#f4f46a]/90 font-extrabold text-base">
+                                    Start for free <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    className="rounded-full h-12 px-7 bg-white/10 text-white hover:bg-white/15 border border-white/10 font-bold"
+                                    onClick={() => setDemoOpen(true)}
+                                >
+                                    Watch 45s demo
+                                </Button>
+                            </div>
+
+                            <div className="mt-10 flex flex-wrap gap-2">
+                                <Pill>
+                                    <Zap className="h-4 w-4" /> Frictionless capture
+                                </Pill>
+                                <Pill>
+                                    <Shield className="h-4 w-4" /> Private by default
+                                </Pill>
+                                <Pill>
+                                    <Bell className="h-4 w-4" /> Recurring reminders
+                                </Pill>
+                            </div>
+                        </div>
+
+                        <div className="lg:col-span-6">
+                            <div className="relative">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <DemoCard icon={Zap} label="AUTO_SYNC" title="Effortless" className="col-span-1">
+                                        <div className="text-sm">Connect iCal once. Your schedule stays current.</div>
+                                        <div className="mt-4 h-2 rounded-full bg-white/10" />
+                                    </DemoCard>
+
+                                    <DemoCard icon={LineChart} label="GROWTH" title="Growth Metric" accent className="col-span-1">
+                                        <div className="text-sm">Weekly rhythm, not random bursts.</div>
+                                        <div className="mt-4 flex items-center gap-2">
+                                            <span className="inline-flex rounded-full bg-black/10 px-2 py-1 text-xs font-bold">+24%</span>
+                                            <span className="text-xs font-semibold text-black/60">Consistency</span>
+                                        </div>
+                                    </DemoCard>
+
+                                    <DemoCard icon={Calendar} label="UPCOMING" title="Managerial Accounting" className="col-span-2">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-white/80">Today · 14:00 · Amphithéâtre</span>
+                                            <span className="text-white/50">School</span>
+                                        </div>
+                                        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Bot size={14} className="text-[#f4f46a]" />
+                                                <div className="text-xs text-white/50">Howie suggests</div>
+                                            </div>
+                                            <div className="text-sm font-semibold text-white">Schedule a 90-min study session tomorrow.</div>
+                                        </div>
+                                    </DemoCard>
+                                </div>
+
+                                <div className="pointer-events-none absolute -right-8 -top-8 hidden md:block">
+                                    <div className="h-24 w-24 rounded-full bg-[#f4f46a]/20 blur-3xl opacity-60" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-14 border-t border-white/10 pt-8 text-white/50 text-sm font-medium">
+                        Trusted by students from top universities juggling lectures, projects, and life.
+                    </div>
+                </div>
+            </section>
+
+            <Section
+                id="product"
+                eyebrow="WHY PRICILIA"
+                title="Your life isn’t messy."
+                highlight="Your tools are."
+                subtitle="Calendar split across platforms, goals without rhythm, money leaking from subscriptions. Pricilia turns all of it into a weekly system you can actually follow."
+            >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {[
+                        { icon: Calendar, title: "Calendar chaos", desc: "School iCal here. Personal events there. Nothing feels complete." },
+                        { icon: Sparkles, title: "Goals with no rhythm", desc: "You plan big, but weekly execution falls apart under real schedules." },
+                        { icon: CreditCard, title: "Money leaks", desc: "Small daily spends + recurring subscriptions quietly drain your month." },
+                    ].map((c, idx) => (
+                        <Card key={idx} className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl h-full">
+                            <CardContent className="p-6">
+                                <div className="h-11 w-11 rounded-2xl bg-white/10 flex items-center justify-center">
+                                    <c.icon className="h-5 w-5 text-white" />
+                                </div>
+                                <div className="mt-4 text-lg font-extrabold text-white">{c.title}</div>
+                                <div className="mt-2 text-sm text-white/60 leading-relaxed">{c.desc}</div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </Section>
+
+            <Section
+                id="overview"
+                eyebrow="MODULES"
+                title="Everything you need"
+                highlight="to get ahead."
+                subtitle="Schedules, goals, deadlines, an action-first AI, and a Finance Tracker designed for recurring life."
+            >
+                <FeatureGrid />
+            </Section>
+
+            <Section
+                id="finance"
+                eyebrow="FINANCE TRACKER"
+                title="Manual input + recurring"
+                highlight="Finance Tracker."
+                subtitle="Track subscriptions, rent, phone plans, and weekly spends with predictable visibility."
+            >
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+                    <DemoCard icon={CreditCard} label="NEW" title="Finance Tracker" accent className="lg:col-span-5 h-full">
+                        <div className="text-sm">Fast entries and recurring rules.</div>
+                        <div className="mt-4 grid grid-cols-1 gap-3">
+                            <div className="rounded-2xl bg-black/10 border border-black/10 p-4">
+                                <div className="text-xs font-bold tracking-widest uppercase text-black/60">Upcoming</div>
+                                <div className="mt-2 flex items-center justify-between">
+                                    <span className="text-sm font-extrabold">Phone plan</span>
+                                    <span className="text-sm font-extrabold">$19</span>
+                                </div>
+                                <div className="mt-1 text-xs text-black/60">Renews tomorrow · Monthly</div>
+                            </div>
+                            <div className="rounded-2xl bg-black/10 border border-black/10 p-4">
+                                <div className="text-xs font-bold tracking-widest uppercase text-black/60">This month</div>
+                                <div className="mt-2 text-3xl font-black">$248</div>
+                                <div className="mt-3 h-2 rounded-full bg-black/10 overflow-hidden">
+                                    <div className="h-full w-[62%] bg-black/30" />
+                                </div>
+                                <div className="mt-2 text-xs text-black/60 flex justify-between">
+                                    <span>Food · Transport · Study</span>
+                                    <span>62% of budget</span>
+                                </div>
+                            </div>
+                        </div>
+                    </DemoCard>
+
+                    <GlassPanel className="lg:col-span-7 p-7 h-full flex flex-col">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className="text-xs font-bold tracking-widest uppercase text-white/50">What you get</div>
+                                <div className="mt-1 text-2xl font-black text-white">Recurring-first system</div>
+                                <div className="mt-3 text-sm text-white/60 max-w-xl leading-relaxed">
+                                    Enter once, reuse forever. See upcoming charges and get soft budget alerts. A system designed to catch leaks before they happen.
+                                </div>
+                            </div>
+                            <Pill className="bg-white/10 border-white/10">Alerts</Pill>
+                        </div>
+
+                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                            {[
+                                { icon: CreditCard, t: "Recurring items", d: "Weekly / monthly / yearly with next charge date." },
+                                { icon: Bell, t: "Upcoming charges", d: "Next 7/30 days list so surprises disappear." },
+                                { icon: LineChart, t: "Budget signals", d: "Soft warnings when you’re about to exceed a category." },
+                                { icon: Shield, t: "Student-friendly", d: "Simple categories, clean summaries, fast add." },
+                            ].map((x, i) => (
+                                <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-5 flex items-start gap-3">
+                                    <div className="h-10 w-10 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                                        <x.icon className="h-5 w-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-extrabold text-white">{x.t}</div>
+                                        <div className="text-xs text-white/50 mt-1 leading-snug">{x.d}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </GlassPanel>
+                </div>
+            </Section>
+
+            <Section id="workflow" eyebrow="WORKFLOW" title="Life OS" highlight="as it should be." subtitle="Sync, plan, execute, repeat.">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <Card className="lg:col-span-5 rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl h-full">
+                        <CardContent className="p-7">
+                            <div className="text-xs font-bold tracking-widest uppercase text-white/50">4 steps</div>
+                            <div className="mt-2 text-2xl font-black text-white">How it works</div>
+                            <div className="mt-6 space-y-3">
+                                {["Connect your calendar", "Set goals + weekly commitment", "Track recurring expenses", "Use ⌘K or Howie to execute"].map((s, i) => (
+                                    <div key={i} className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 flex items-center gap-3">
+                                        <div className="h-8 w-8 rounded-xl bg-white/10 flex items-center justify-center text-sm font-extrabold shrink-0">{i + 1}</div>
+                                        <div className="text-sm font-semibold text-white/80">{s}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="lg:col-span-7 rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl h-full">
+                        <CardContent className="p-7">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="text-xs font-bold tracking-widest uppercase text-white/50">Principles</div>
+                                    <div className="mt-2 text-2xl font-black text-white">Designed for execution</div>
+                                </div>
+                                <Pill className="bg-[#f4f46a]/10 border-[#f4f46a]/20 text-[#f4f46a]">Student-first</Pill>
+                            </div>
+
+                            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {[
+                                    { icon: Zap, t: "Frictionless", d: "Capture tasks in seconds." },
+                                    { icon: Command, t: "Time-saving", d: "Keyboard-first navigation." },
+                                    { icon: Shield, t: "Private", d: "Your data is yours." },
+                                    { icon: Bell, t: "Automation", d: "Recurring bills reduce mental load." },
+                                ].map((x, i) => (
+                                    <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                                                <x.icon className="h-5 w-5 text-white" />
+                                            </div>
+                                            <div>
+                                                <div className="text-sm font-extrabold text-white">{x.t}</div>
+                                                <div className="text-xs text-white/50 mt-1">{x.d}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </Section>
+
+            <Section id="pricing" eyebrow="PRICING" title="Ready to upgrade" highlight="your life?" subtitle="Start free. Upgrade when you want Howie actions and Finance insights.">
+                <Pricing />
+            </Section>
+
+            <Section id="faq" eyebrow="FAQ" title="Questions," highlight="answered." subtitle="Clear answers for students who want a serious system.">
+                <FAQ />
+            </Section>
+
+            <section className="relative py-20 md:py-28 border-t border-white/10 overflow-hidden">
+                <div className="absolute inset-0">
+                    <div className="absolute left-1/2 top-1/2 h-[520px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f4f46a]/15 blur-3xl opacity-50" />
+                </div>
+                <div className="relative mx-auto w-full max-w-6xl px-5 md:px-8">
+                    <div className="text-center">
+                        <h3 className="text-4xl md:text-6xl font-black tracking-tight text-white">Ready to upgrade your life?</h3>
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                            <Button onClick={handleLogin} className="rounded-full h-12 px-8 bg-[#f4f46a] text-black hover:bg-[#f4f46a]/90 font-extrabold text-base transform hover:scale-105 transition-transform duration-200">Start for free</Button>
+                            <Button
+                                variant="secondary"
+                                className="rounded-full h-12 px-8 bg-white/10 text-white hover:bg-white/15 border border-white/10 font-bold"
+                                onClick={() => setDemoOpen(true)}
+                            >
+                                Try ⌘K demo
+                            </Button>
+                        </div>
+                        <div className="mt-4 text-xs text-white/40 font-medium">No credit card required · Free for students</div>
+                    </div>
+                </div>
+            </section>
+
+            <Footer />
         </div>
     );
 }
