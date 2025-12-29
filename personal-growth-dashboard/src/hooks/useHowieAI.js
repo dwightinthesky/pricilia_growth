@@ -56,7 +56,7 @@ export function useHowieAI(user) {
                     id: e.id,
                     title: e.title,
                     start: e.start,
-                    end: e.end,
+                    durationMin: Math.round((new Date(e.end) - new Date(e.start)) / 60000),
                     extraUpGoalId: e.extraUpGoalId
                 }));
 
@@ -152,14 +152,18 @@ export function useHowieAI(user) {
                     return;
                 }
 
+                const duration = Math.max(15, Math.round((slot.end.getTime() - slot.start.getTime()) / 60000));
+
                 const newEvent = eventsCreate({
                     userId: user.uid,
                     title: title || "Deep work session",
                     start: slot.start.toISOString(),
-                    end: slot.end.toISOString(),
+                    duration,
                     extraUpGoalId: goalId || null,
                     category: "Personal", // default
-                    resource: "Personal"
+                    resource: "Personal",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
                 });
 
                 // Navigate to schedule to show user the new event. 
@@ -179,16 +183,18 @@ export function useHowieAI(user) {
 
                 // Calculate end time usually done in client or passed
                 const start = new Date(startISO);
-                const end = new Date(start.getTime() + (durationMin || 60) * 60000);
+                const duration = Math.max(15, Math.round(durationMin || 60));
 
                 const newEvent = eventsCreate({
                     userId: user.uid,
                     title: title || "New Session",
                     start: start.toISOString(),
-                    end: end.toISOString(),
+                    duration,
                     extraUpGoalId: extraUpGoalId || null,
                     category: "Personal",
-                    resource: "Personal"
+                    resource: "Personal",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
                 });
 
                 if (newEvent && newEvent.id) {
