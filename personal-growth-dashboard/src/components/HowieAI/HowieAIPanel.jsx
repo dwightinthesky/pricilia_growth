@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sparkles, AlertCircle } from 'lucide-react';
+import { X, Sparkles, AlertCircle, ArrowRight } from 'lucide-react';
 import { useHowieAI } from '../../hooks/useHowieAI';
 import HowieCards from './HowieCards';
 import ToneSwitch from './ToneSwitch';
