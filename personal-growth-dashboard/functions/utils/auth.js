@@ -40,7 +40,7 @@ export async function requireSupabaseUser(request, env) {
 
     const user = await r.json();
     // user.id is UUID
-    return { uid: user.id, email: user.email || null };
+    return { id: user.id, email: user.email || null };
 }
 
 // Alias for backward compatibility during migration

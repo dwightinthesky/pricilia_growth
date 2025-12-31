@@ -35,6 +35,7 @@ export default function PricingPage({ onSelectPlan, currentPlanId }) {
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({ plan: planId }),
             });
 
             if (!res.ok) {

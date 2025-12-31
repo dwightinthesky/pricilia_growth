@@ -1,30 +1,115 @@
-function extractFirstJson(text) {
-  // Conservative recovery: try to find the first JSON object
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
-  const candidate = text.slice(start, end + 1);
-  try { return JSON.parse(candidate); } catch { return null; }
+import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseUser } from "../utils/auth";
+import { getPlanByUserId } from "../utils/getPlan";
+
+const LIMITS = {
+  free: 3,
+  plus: 10,
+  pro: 999999,
+};
+
+function todayUTC() {
+  const d = new Date();
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+async function getUsage(supabase, userId, day) {
+  const { data, error } = await supabase
+    .from("howie_daily_usage")
+    .select("count")
+    .eq("user_id", userId)
+    .eq("day", day)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("getUsage error", error);
+    return 0;
+  }
+  return data?.count || 0;
+}
+
+async function incUsage(supabase, userId, day) {
+  const { error: rpcErr } = await supabase.rpc("howie_usage_increment", {
+    p_user_id: userId,
+    p_day: day,
+  });
+
+  if (!rpcErr) return;
+
+  console.warn("howie_usage_increment RPC failed, using fallback upsert", rpcErr);
+
+  const current = await getUsage(supabase, userId, day);
+  const { error: upsertErr } = await supabase
+    .from("howie_daily_usage")
+    .upsert(
+      { user_id: userId, day, count: current + 1, updated_at: new Date().toISOString() },
+      { onConflict: "user_id, day" }
+    );
+
+  if (upsertErr) console.error("incUsage fallback failed", upsertErr);
 }
 
 function isValidHowieResponse(x) {
-  return x && typeof x === "object"
-    && ["on_track", "behind", "overloaded"].includes(x.status)
-    && typeof x.summary === "string"
-    && Array.isArray(x.recommendations);
+  return (
+    x &&
+    typeof x === "object" &&
+    ["on_track", "behind", "overloaded"].includes(x.status) &&
+    typeof x.summary === "string" &&
+    Array.isArray(x.recommendations)
+  );
+}
+
+async function openaiChatJSON({ apiKey, model, messages, temperature = 0.2, max_tokens = 700 }) {
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature,
+      max_tokens,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  const out = await r.json();
+  if (!r.ok) throw new Error(out?.error?.message || "OpenAI request failed");
+  return out;
 }
 
 export const onRequestPost = async ({ request, env }) => {
   try {
-    if (!env.OPENAI_API_KEY) {
-      return new Response(JSON.stringify({ error: "OPENAI_API_KEY missing" }), { status: 500 });
+    if (!env.SUPABASE_URL) throw new Error("ENV_MISSING:SUPABASE_URL");
+    if (!env.SUPABASE_SERVICE_ROLE_KEY) throw new Error("ENV_MISSING:SUPABASE_SERVICE_ROLE_KEY");
+    if (!env.OPENAI_API_KEY) throw new Error("ENV_MISSING:OPENAI_API_KEY");
+
+    const { id: userId } = await requireSupabaseUser(request, env);
+
+    const admin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false },
+    });
+
+    const { plan } = await getPlanByUserId({ supabase: admin, userId });
+    const limit = LIMITS[plan] ?? LIMITS.free;
+
+    const day = todayUTC();
+    const used = await getUsage(admin, userId, day);
+
+    if (used >= limit) {
+      return Response.json(
+        { error: "HOWIE_LIMIT_REACHED", plan, used, limit, remaining: 0 },
+        { status: 402 }
+      );
     }
 
     const body = await request.json();
-    const tone = body?.tone || "calm"; // calm | strict | coach
-    const context = body?.context || {};
-    const memory = body?.memory || {};
-    const intent = body?.intent || "general";
+    const { tone, intent, context, memory } = body;
 
     const system = `
 You are HowieAI, a product-grade growth assistant.
@@ -71,58 +156,43 @@ Rules:
   - If any goal alert=behind => status="behind"
   - If any goal alert=overloaded => status="overloaded"
   - Else status="on_track"
-- Action payload rules:
-  - open_schedule payload: { "url": string }
-  - schedule_session payload: { "goalId"?: string, "title": string, "durationMin": number }
-  - create_event payload: { "title": string, "startISO": string, "durationMin": number, "extraUpGoalId"?: string }
 - Always include a fallback open_schedule action too.
 `.trim();
 
     const userPayload = JSON.stringify({ tone, intent, context, memory });
 
-    const r = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        response_format: { type: "json_object" },
-        temperature: 0.2,
-        max_tokens: 700,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: userPayload },
-        ],
-      }),
+    const completion = await openaiChatJSON({
+      apiKey: env.OPENAI_API_KEY,
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: userPayload },
+      ],
+      temperature: 0.2,
+      max_tokens: 700,
     });
 
-    if (!r.ok) {
-      const t = await r.text();
-      return new Response(JSON.stringify({ error: "OpenAI error", detail: t }), { status: 500 });
-    }
+    await incUsage(admin, userId, day);
 
-    const data = await r.json();
+    const nextUsed = used + 1;
+    const remaining = Math.max(0, limit - nextUsed);
 
-    // Responses API structure might vary, so we parse the content string
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      return new Response(JSON.stringify({ error: "No content from OpenAI" }), { status: 500 });
-    }
-
+    const content = completion?.choices?.[0]?.message?.content;
     let parsed = null;
-    try { parsed = JSON.parse(content); } catch { parsed = null; }
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      parsed = null;
+    }
 
     if (!parsed || !isValidHowieResponse(parsed)) {
-      // Fallback or detailed error for debugging
-      return new Response(JSON.stringify({ error: "Invalid HowieResponse", raw: content }), { status: 500 });
+      return Response.json({ error: "Invalid HowieResponse", raw: content }, { status: 500 });
     }
 
-    return new Response(JSON.stringify(parsed), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err?.message || "Unknown error" }), { status: 500 });
+    parsed._usage = { plan, used: nextUsed, limit, remaining };
+
+    return Response.json(parsed);
+  } catch (e) {
+    return Response.json({ error: e?.message || "Howie failed" }, { status: 500 });
   }
 };

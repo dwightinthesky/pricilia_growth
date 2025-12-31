@@ -17,7 +17,7 @@ import {
     Menu,
     X,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -565,6 +565,375 @@ function Footer() {
     );
 }
 
+// --- NEW HERO & UTILS (V3.2) ---
+
+function useNow(tickMs = 1000) {
+    const [now, setNow] = useState(() => Date.now());
+    useEffect(() => {
+        const id = setInterval(() => setNow(Date.now()), tickMs);
+        return () => clearInterval(id);
+    }, [tickMs]);
+    return now;
+}
+
+function formatHMS(ms) {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const h = String(Math.floor(total / 3600)).padStart(2, "0");
+    const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+    const s = String(total % 60).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+}
+
+function clamp(n, a, b) {
+    return Math.max(a, Math.min(b, n));
+}
+
+function AnimatedNumber({ value, suffix = "", className }) {
+    const reduce = useReducedMotion();
+    const [display, setDisplay] = useState(value);
+
+    useEffect(() => {
+        if (reduce) {
+            setDisplay(value);
+            return;
+        }
+        const start = display;
+        const end = value;
+        const dur = 550;
+        const t0 = performance.now();
+
+        let raf = 0;
+        const loop = (t) => {
+            const p = clamp((t - t0) / dur, 0, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            const next = start + (end - start) * eased;
+            setDisplay(next);
+            if (p < 1) raf = requestAnimationFrame(loop);
+        };
+        raf = requestAnimationFrame(loop);
+        return () => cancelAnimationFrame(raf);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value]);
+
+    const txt = Number.isFinite(display) ? Math.round(display) : value;
+
+    return (
+        <span className={cn("tabular-nums", className)}>
+            {txt}
+            {suffix}
+        </span>
+    );
+}
+
+function MetricPill({ label, value, hint, tone = "neutral" }) {
+    const tones = {
+        neutral: "bg-white/5 border-white/10 text-white/80",
+        good: "bg-emerald-500/10 border-emerald-500/20 text-emerald-200",
+        warn: "bg-amber-500/10 border-amber-500/20 text-amber-200",
+        bad: "bg-rose-500/10 border-rose-500/20 text-rose-200",
+    };
+
+    return (
+        <div className={cn("rounded-full border px-3 py-2", tones[tone] || tones.neutral)}>
+            <div className="flex items-baseline gap-2">
+                <div className="text-[11px] font-bold tracking-widest uppercase opacity-70">{label}</div>
+                <div className="text-sm font-extrabold">{value}</div>
+            </div>
+            {hint ? <div className="text-[11px] opacity-70 mt-0.5">{hint}</div> : null}
+        </div>
+    );
+}
+
+function StatusChip({ status }) {
+    const map = {
+        onTrack: { text: "ON TRACK", cls: "bg-emerald-500/15 border-emerald-500/25 text-emerald-200" },
+        behind: { text: "BEHIND", cls: "bg-amber-500/15 border-amber-500/25 text-amber-200" },
+        overloaded: { text: "OVERLOADED", cls: "bg-rose-500/15 border-rose-500/25 text-rose-200" },
+    };
+    const s = map[status] || map.onTrack;
+    return (
+        <span className={cn("inline-flex items-center rounded-full border px-3 py-1 text-xs font-extrabold tracking-widest", s.cls)}>
+            {s.text}
+        </span>
+    );
+}
+
+function Hero({ onPrimary, onDemo }) {
+    const reduce = useReducedMotion();
+
+    // 你之後接真資料：把這裡換成從 schedule_events / goals / finance 聚合的值即可
+    const today = useMemo(() => {
+        // fake but believable
+        const focusBlocks = 2;
+        const schoolHours = 3.5;
+        const recoveryMins = 520;
+        const loadScore = 68; // 0~100
+        return { focusBlocks, schoolHours, recoveryMins, loadScore };
+    }, []);
+
+    const todayStatus = useMemo(() => {
+        // 你的規則：onTrack | behind | overloaded
+        if (today.loadScore >= 82) return "overloaded";
+        if (today.loadScore <= 45) return "behind";
+        return "onTrack";
+    }, [today.loadScore]);
+
+    // Upcoming ticker demo：假設下一堂在 14:00
+    const now = useNow(1000);
+    const nextStart = useMemo(() => {
+        const d = new Date();
+        d.setHours(14, 0, 0, 0);
+        const t = d.getTime();
+        // 如果現在已過 14:00，就顯示明天 14:00
+        return t <= now ? t + 24 * 3600 * 1000 : t;
+    }, [now]);
+
+    const msLeft = nextStart - now;
+    const ticker = formatHMS(msLeft);
+
+    // Parallax header glow
+    const { scrollYProgress } = useScroll();
+    const glowY = useTransform(scrollYProgress, [0, 0.12], [0, 40]);
+    const glowOpacity = useTransform(scrollYProgress, [0, 0.12], [0.55, 0]);
+
+    return (
+        <section className="relative overflow-hidden">
+            {/* background */}
+            <div className="absolute inset-0">
+                <motion.div
+                    style={{ y: glowY, opacity: glowOpacity }}
+                    className="absolute -top-32 left-1/2 h-[560px] w-[980px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl"
+                />
+                <div className="absolute -bottom-40 left-[12%] h-[420px] w-[420px] rounded-full bg-[#f4f46a]/18 blur-3xl opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
+            </div>
+
+            <div className="relative mx-auto w-full max-w-6xl px-5 md:px-8 pt-14 md:pt-20 pb-14 md:pb-20">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    {/* left */}
+                    <div className="lg:col-span-7">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <StatusChip status={todayStatus} />
+                            <Pill className="bg-white/10 border-white/10 text-white/80">
+                                <span className="h-2 w-2 rounded-full bg-[#f4f46a]" /> DAILY COMMAND CENTER
+                            </Pill>
+                            <Pill className="bg-white/10 border-white/10 text-white/70">Plan: FREE</Pill>
+                        </div>
+
+                        <motion.h1
+                            initial={reduce ? false : { opacity: 0, y: 10 }}
+                            animate={reduce ? undefined : { opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="mt-6 text-5xl md:text-7xl font-black tracking-tight leading-[0.95]"
+                        >
+                            Today is manageable.
+                            <br />
+                            Make it <span className="text-[#f4f46a]">inevitable</span>.
+                        </motion.h1>
+
+                        <div className="mt-5 text-base md:text-lg text-white/60 max-w-2xl leading-relaxed">
+                            No marketing fluff. Just numbers you can act on — load, focus, school hours, recovery windows, and what’s next.
+                        </div>
+
+                        {/* daily score strip */}
+                        <motion.div
+                            initial={reduce ? false : { opacity: 0, y: 12 }}
+                            animate={reduce ? undefined : { opacity: 1, y: 0 }}
+                            transition={{ duration: 0.45, delay: 0.06 }}
+                            className="mt-7 flex flex-wrap gap-2"
+                        >
+                            <MetricPill
+                                label="Today load"
+                                value={<AnimatedNumber value={today.loadScore} suffix="%" className="font-extrabold" />}
+                                hint={todayStatus === "overloaded" ? "Protect energy" : todayStatus === "behind" ? "Start small" : "Keep momentum"}
+                                tone={todayStatus === "overloaded" ? "bad" : todayStatus === "behind" ? "warn" : "good"}
+                            />
+                            <MetricPill
+                                label="Focus blocks"
+                                value={
+                                    <span className="font-extrabold">
+                                        <AnimatedNumber value={today.focusBlocks} /> blocks
+                                    </span>
+                                }
+                                hint="Deep work units"
+                            />
+                            <MetricPill
+                                label="School hours"
+                                value={
+                                    <span className="font-extrabold tabular-nums">
+                                        {today.schoolHours.toFixed(1)}h
+                                    </span>
+                                }
+                                hint="From schedule"
+                            />
+                            <MetricPill
+                                label="Recovery"
+                                value={
+                                    <span className="font-extrabold tabular-nums">
+                                        {Math.floor(today.recoveryMins / 60)}h {String(today.recoveryMins % 60).padStart(2, "0")}m
+                                    </span>
+                                }
+                                hint="Best gap today"
+                                tone={today.recoveryMins >= 360 ? "good" : "neutral"}
+                            />
+                        </motion.div>
+
+                        {/* actions */}
+                        <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                            <Button
+                                onClick={onPrimary}
+                                className="rounded-full h-12 px-7 bg-[#f4f46a] text-black hover:bg-[#f4f46a]/90 font-extrabold text-base"
+                            >
+                                Start for free <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                className="rounded-full h-12 px-7 bg-white/10 text-white hover:bg-white/15 border border-white/10 font-bold"
+                                onClick={onDemo}
+                            >
+                                Watch 45s demo
+                            </Button>
+                        </div>
+
+                        {/* micro trust row */}
+                        <div className="mt-10 flex flex-wrap gap-2">
+                            <Pill><Zap className="h-4 w-4" /> Fast capture</Pill>
+                            <Pill><Shield className="h-4 w-4" /> Private by default</Pill>
+                            <Pill><Bell className="h-4 w-4" /> Recurring alerts</Pill>
+                            <Pill><Command className="h-4 w-4" /> ⌘K navigation</Pill>
+                        </div>
+                    </div>
+
+                    {/* right: command center preview */}
+                    <div className="lg:col-span-5">
+                        <motion.div
+                            initial={reduce ? false : { opacity: 0, y: 14, scale: 0.98 }}
+                            animate={reduce ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                            transition={{ type: "spring", stiffness: 240, damping: 22 }}
+                            className="relative"
+                        >
+                            {/* outer glow frame */}
+                            <div className="absolute -inset-3 rounded-[2.25rem] bg-[#f4f46a]/20 blur-2xl opacity-70" />
+
+                            <Card className="relative rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl overflow-hidden">
+                                <CardContent className="p-6">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <div className="text-xs font-bold tracking-widest uppercase text-white/50">Next Up</div>
+                                            <div className="mt-1 text-lg font-extrabold text-white">Managerial Accounting</div>
+                                            <div className="mt-1 text-sm text-white/60">Today · 14:00 · Amphithéâtre</div>
+                                        </div>
+
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
+                                            <div className="text-[10px] font-bold tracking-widest uppercase text-white/40">Starts in</div>
+
+                                            {/* ticker: tabular-nums, no layout shift */}
+                                            <div className="mt-0.5 text-xl font-black text-white tabular-nums leading-none">
+                                                <AnimatePresence mode="popLayout">
+                                                    <motion.span
+                                                        key={ticker}
+                                                        initial={{ opacity: 0, y: 6 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        exit={{ opacity: 0, y: -6 }}
+                                                        transition={{ duration: 0.18 }}
+                                                        className="inline-block"
+                                                    >
+                                                        {ticker}
+                                                    </motion.span>
+                                                </AnimatePresence>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* actionable strip */}
+                                    <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Bot size={14} className="text-[#f4f46a]" />
+                                            <div className="text-xs text-white/50">Howie suggests</div>
+                                        </div>
+                                        <div className="text-sm font-semibold text-white">
+                                            Schedule a 90 min focus block before class.
+                                        </div>
+                                        <div className="mt-3 flex gap-2">
+                                            <Button
+                                                variant="black"
+                                                className="rounded-xl h-10 px-4 text-sm font-extrabold"
+                                                onClick={onPrimary}
+                                            >
+                                                Start focus <ArrowRight className="ml-2 h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="secondary"
+                                                className="rounded-xl h-10 px-4 text-sm font-bold bg-white/10 text-white border border-white/10"
+                                                onClick={onDemo}
+                                            >
+                                                Ask HowieAI
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* mini timeline */}
+                                    <div className="mt-5 space-y-2">
+                                        {[
+                                            { t: "09:00", name: "Deep work", done: true },
+                                            { t: "14:00", name: "Managerial Accounting", active: true },
+                                            { t: "18:30", name: "Gym", tag: "Personal" },
+                                        ].map((x, i) => (
+                                            <div
+                                                key={i}
+                                                className={cn(
+                                                    "group flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 transition",
+                                                    "hover:bg-white/10 hover:border-white/20"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className={cn("text-xs font-mono tabular-nums", x.active ? "text-[#f4f46a]" : "text-white/60")}>
+                                                        {x.t}
+                                                    </div>
+                                                    <div className={cn("text-sm font-semibold truncate", x.done ? "text-white/40 line-through" : "text-white")}>
+                                                        {x.name}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    {x.tag ? (
+                                                        <span className="text-[11px] font-bold rounded-full px-2 py-1 bg-white/10 border border-white/10 text-white/70">
+                                                            {x.tag}
+                                                        </span>
+                                                    ) : null}
+                                                    {x.active ? (
+                                                        <span className="text-[11px] font-extrabold rounded-full px-2 py-1 bg-[#f4f46a]/20 border border-[#f4f46a]/25 text-[#f4f46a]">
+                                                            NOW
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+
+                                {/* footer micro detail */}
+                                <div className="px-6 py-4 border-t border-white/10 bg-black/20">
+                                    <div className="flex items-center justify-between text-xs text-white/50">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-400/80" />
+                                            <span>Synced 2 calendars · Updated 1m ago</span>
+                                        </div>
+                                        <span className="tabular-nums">Latency 82ms</span>
+                                    </div>
+                                </div>
+                            </Card>
+                        </motion.div>
+                    </div>
+                </div>
+
+                <div className="mt-14 border-t border-white/10 pt-8 text-white/50 text-sm font-medium">
+                    Trusted by students juggling lectures, projects, and life — with a dashboard that actually tells you what to do next.
+                </div>
+            </div>
+        </section>
+    );
+}
+
 // --- MAIN PAGE ---
 export default function LandingPage() {
     const [demoOpen, setDemoOpen] = useState(false);
@@ -674,99 +1043,7 @@ export default function LandingPage() {
                 </AnimatePresence>
             </header>
 
-            <section className="relative overflow-hidden">
-                <div className="absolute inset-0">
-                    <div className="absolute -top-28 left-1/2 h-[520px] w-[980px] -translate-x-1/2 rounded-full bg-white/10 blur-3xl" />
-                    <div className="absolute -bottom-40 left-[10%] h-[420px] w-[420px] rounded-full bg-[#f4f46a]/20 blur-3xl opacity-50" />
-                </div>
-
-                <div className="relative mx-auto w-full max-w-6xl px-5 md:px-8 pt-14 md:pt-20 pb-16 md:pb-24">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-                        <div className="lg:col-span-6">
-                            <Pill className="bg-white/10 border-white/10 text-white/80">
-                                <span className="h-2 w-2 rounded-full bg-[#f4f46a]" /> V3.1 — Smart Sync + ⌘K + Finance
-                            </Pill>
-
-                            <h1 className="mt-6 text-5xl md:text-7xl font-black tracking-tight leading-[0.95]">
-                                The operating system
-                                <br />
-                                for <span className="text-[#f4f46a]">high achievers</span>.
-                            </h1>
-
-                            <p className="mt-6 text-base md:text-lg text-white/60 max-w-xl">
-                                Stop juggling calendars, notes, and spreadsheets. Pricilia merges your university schedule, personal events,
-                                long-term goals, and recurring expenses into one dashboard — with an AI agent that takes action.
-                            </p>
-
-                            <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                                <Button onClick={handleLogin} className="rounded-full h-12 px-7 bg-[#f4f46a] text-black hover:bg-[#f4f46a]/90 font-extrabold text-base">
-                                    Start for free <ArrowRight className="ml-2 h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    className="rounded-full h-12 px-7 bg-white/10 text-white hover:bg-white/15 border border-white/10 font-bold"
-                                    onClick={() => setDemoOpen(true)}
-                                >
-                                    Watch 45s demo
-                                </Button>
-                            </div>
-
-                            <div className="mt-10 flex flex-wrap gap-2">
-                                <Pill>
-                                    <Zap className="h-4 w-4" /> Frictionless capture
-                                </Pill>
-                                <Pill>
-                                    <Shield className="h-4 w-4" /> Private by default
-                                </Pill>
-                                <Pill>
-                                    <Bell className="h-4 w-4" /> Recurring reminders
-                                </Pill>
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-6">
-                            <div className="relative">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <DemoCard icon={Zap} label="AUTO_SYNC" title="Effortless" className="col-span-1">
-                                        <div className="text-sm">Connect iCal once. Your schedule stays current.</div>
-                                        <div className="mt-4 h-2 rounded-full bg-white/10" />
-                                    </DemoCard>
-
-                                    <DemoCard icon={LineChart} label="GROWTH" title="Growth Metric" accent className="col-span-1">
-                                        <div className="text-sm">Weekly rhythm, not random bursts.</div>
-                                        <div className="mt-4 flex items-center gap-2">
-                                            <span className="inline-flex rounded-full bg-black/10 px-2 py-1 text-xs font-bold">+24%</span>
-                                            <span className="text-xs font-semibold text-black/60">Consistency</span>
-                                        </div>
-                                    </DemoCard>
-
-                                    <DemoCard icon={Calendar} label="UPCOMING" title="Managerial Accounting" className="col-span-2">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-white/80">Today · 14:00 · Amphithéâtre</span>
-                                            <span className="text-white/50">School</span>
-                                        </div>
-                                        <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Bot size={14} className="text-[#f4f46a]" />
-                                                <div className="text-xs text-white/50">Howie suggests</div>
-                                            </div>
-                                            <div className="text-sm font-semibold text-white">Schedule a 90-min study session tomorrow.</div>
-                                        </div>
-                                    </DemoCard>
-                                </div>
-
-                                <div className="pointer-events-none absolute -right-8 -top-8 hidden md:block">
-                                    <div className="h-24 w-24 rounded-full bg-[#f4f46a]/20 blur-3xl opacity-60" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-14 border-t border-white/10 pt-8 text-white/50 text-sm font-medium">
-                        Trusted by students from top universities juggling lectures, projects, and life.
-                    </div>
-                </div>
-            </section>
+            <Hero onPrimary={handleLogin} onDemo={() => setDemoOpen(true)} />
 
             <Section
                 id="product"

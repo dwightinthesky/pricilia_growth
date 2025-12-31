@@ -1,236 +1,124 @@
-import { useState, useEffect } from 'react';
-import useUnifiedEvents from './useUnifiedEvents';
-import useExtraUpGoals from './useExtraUpGoals';
-import { eventsCreate } from '../services/dataClient/eventsClient';
-import { findFreeSlot } from '../utils/findFreeSlot';
-import { useNavigate } from 'react-router-dom';
-import { useHowieUsage } from './useHowieUsage';
-import { useHowieMemory } from './useHowieMemory';
-import useSubscription from './useSubscription';
+import { useMemo, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { usePlan } from "./usePlan";
+import { supabase } from "../utils/supabaseClient";
 
-export function useHowieAI(user) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [response, setResponse] = useState(null);
+const LIMITS = {
+    free: 3,
+    plus: 10,
+    pro: Infinity,
+};
+
+function todayKey() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+function usageKey(userId) {
+    return `howie_usage:${userId}:${todayKey()}`;
+}
+
+function getUsed(userId) {
+    if (!userId) return 0;
+    const k = usageKey(userId);
+    const raw = localStorage.getItem(k);
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function setUsed(userId, val) {
+    if (!userId) return;
+    localStorage.setItem(usageKey(userId), String(val));
+}
+
+export function useHowieAI() {
+    const { currentUser } = useAuth();
+    const { plan } = usePlan();
+    const userId = currentUser?.id || currentUser?.uid;
+
+    const [sending, setSending] = useState(false);
     const [error, setError] = useState(null);
+    const [response, setResponse] = useState(null);
+    const [isOpen, setIsOpen] = useState(false); // Restore basic panel state mgmt
 
-    // Memory Integration
-    const { memory, setTone: saveTone, pushRecent, pinGoal } = useHowieMemory();
-    const [tone, setToneState] = useState(memory.tone || "calm");
+    const limit = LIMITS[plan] ?? LIMITS.free;
+    // Force re-read of usage when sending changes or plan changes
+    // We use a dummy state to trigger re-render if needed, but for now memo dependency on [sending] is a cheat to refresh after send
+    const used = getUsed(userId);
 
-    const { events } = useUnifiedEvents(user);
-    const { goals } = useExtraUpGoals(user);
-    const navigate = useNavigate();
+    const remaining = limit === Infinity ? Infinity : Math.max(0, limit - used);
+    const canSend = remaining === Infinity ? true : remaining > 0;
 
-    // Subscription Limits
-    const { plan } = useSubscription(user);
-
-    // Usage Limits
-    const { exhausted, remaining, consume, limit } = useHowieUsage(plan?.limits?.howieDaily);
-
-    const toggle = () => setIsOpen(prev => !prev);
+    const toggle = () => setIsOpen(v => !v);
     const close = () => setIsOpen(false);
 
-    // Sync tone change to memory
-    const setTone = (newTone) => {
-        setToneState(newTone);
-        saveTone(newTone);
-    };
-
-    const askHowie = async (intent = "Plan my week") => {
-        if (exhausted) {
-            setError("HOWIE_LIMIT_REACHED");
-            return;
-        }
-
-        setIsLoading(true);
+    const askHowie = async (intent, context = {}) => {
         setError(null);
         setResponse(null);
 
-        consume();
+        if (!currentUser) {
+            setError("Please log in first.");
+            return null;
+        }
 
+        if (!canSend) {
+            setError("Daily credits used up.");
+            return null;
+        }
+
+        setSending(true);
         try {
-            const now = new Date();
-            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-
-            const upcomingEvents = (events || [])
-                .filter(e => new Date(e.end) > now)
-                .slice(0, 30) // cap at 30 events
-                .map(e => ({
-                    id: e.id,
-                    title: e.title,
-                    start: e.start,
-                    durationMin: Math.round((new Date(e.end) - new Date(e.start)) / 60000),
-                    extraUpGoalId: e.extraUpGoalId
-                }));
-
-            const simpleGoals = (goals || []).map(g => ({
-                id: g.id,
-                title: g.title,
-                weeklyCommitment: g.weeklyCommitment,
-                progress: g.progress, // %
-                weekMinutes: g.weekMinutes,
-                alert: g.alert ? g.alert.type : 'on_track'
-            }));
-
+            const { data: sessionData } = await supabase.auth.getSession();
+            const token = sessionData?.session?.access_token;
             const payload = {
                 intent,
-                tone,
-                context: {
-                    now: now.toISOString(),
-                    startOfDay,
-                    upcomingEvents,
-                    goals: simpleGoals
-                },
-                memory: {
-                    preferred: memory.preferred,
-                    pinnedGoalIds: memory.pinnedGoalIds,
-                    recent: memory.recent
-                }
+                context // Pass extra context if needed
             };
 
-            const res = await fetch('/api/howie', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+            const r = await fetch("/api/howie", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify(payload),
             });
 
-            if (!res.ok) {
-                if (res.status === 429) {
-                    throw new Error("Howie is thinking too hard. Try again in a minute.");
-                }
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData.error || "Failed to reach HowieAI");
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                throw new Error(data?.error || "Howie request failed");
             }
 
-            const data = await res.json();
-            // Backend now returns the parsed JSON directly
             setResponse(data);
 
-        } catch (err) {
-            console.error(err);
-            setError(err.message || "Something went wrong");
+            if (limit !== Infinity) {
+                setUsed(userId, used + 1);
+            }
+
+            return data;
+        } catch (e) {
+            setError(e.message || "Howie request failed");
+            return null;
         } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const executeAction = async (action) => {
-        if (!action) return;
-
-        // Memory: Record action
-        pushRecent({ type: action.type, label: action.label, payload: action.payload });
-
-        // Memory: Pin goal if involved
-        if (action.payload?.goalId) pinGoal(action.payload.goalId);
-        if (action.payload?.extraUpGoalId) pinGoal(action.payload.extraUpGoalId);
-
-        try {
-            if (action.type === 'open_schedule') {
-                if (action.payload?.url) {
-                    navigate(action.payload.url);
-                } else if (action.payload?.extraUpGoalId) {
-                    navigate(`/schedule?extraUp=${action.payload.extraUpGoalId}`);
-                } else {
-                    navigate('/schedule');
-                }
-                close();
-                return;
-            }
-
-            if (action.type === 'schedule_session') {
-                const { durationMin, title, goalId } = action.payload;
-
-                const slot = findFreeSlot({
-                    events,
-                    durationMin: durationMin || 60,
-                    startFrom: new Date(),
-                    days: 7,
-                    dayStartHour: 8,
-                    dayEndHour: 22,
-                });
-
-                if (!slot) {
-                    alert("No free slot found in the next 7 days. Try widening time window or freeing up space.");
-                    // Don't close so user can see message
-                    return;
-                }
-
-                const duration = Math.max(15, Math.round((slot.end.getTime() - slot.start.getTime()) / 60000));
-
-                const newEvent = eventsCreate({
-                    userId: user.uid,
-                    title: title || "Deep work session",
-                    start: slot.start.toISOString(),
-                    duration,
-                    extraUpGoalId: goalId || null,
-                    category: "Personal", // default
-                    resource: "Personal",
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                });
-
-                // Navigate to schedule to show user the new event. 
-                // Uses ?focus=eventId if supported, or just date
-                if (newEvent && newEvent.id) {
-                    navigate(`/schedule?focus=${newEvent.id}`);
-                } else {
-                    navigate(`/schedule?date=${slot.start.toISOString().slice(0, 10)}`);
-                }
-
-                close();
-                return;
-            }
-
-            if (action.type === 'create_event') {
-                const { title, startISO, durationMin, extraUpGoalId } = action.payload;
-
-                // Calculate end time usually done in client or passed
-                const start = new Date(startISO);
-                const duration = Math.max(15, Math.round(durationMin || 60));
-
-                const newEvent = eventsCreate({
-                    userId: user.uid,
-                    title: title || "New Session",
-                    start: start.toISOString(),
-                    duration,
-                    extraUpGoalId: extraUpGoalId || null,
-                    category: "Personal",
-                    resource: "Personal",
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                });
-
-                if (newEvent && newEvent.id) {
-                    navigate(`/schedule?focus=${newEvent.id}`);
-                } else {
-                    navigate(`/schedule?date=${start.toISOString().slice(0, 10)}`);
-                }
-                close();
-                return;
-            }
-
-            console.warn("Unknown action type", action.type);
-
-        } catch (err) {
-            console.error("Action execution failed", err);
-            alert("Failed to execute action: " + err.message);
+            setSending(false);
         }
     };
 
     return {
+        plan,
+        limit,
+        used,
+        remaining,
+        canSend,
+        sending,
+        error,
+        response,
         isOpen,
         toggle,
         close,
-        isLoading,
-        response,
-        error,
-        tone,
-        setTone,
         askHowie,
-        executeAction,
-        remaining,
-        limit,
-        memory // Export memory
     };
 }

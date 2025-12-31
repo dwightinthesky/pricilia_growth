@@ -45,9 +45,18 @@ export default function HowieAIPanel({ isOpen, onClose, controller }) {
             <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
                 {/* Header */}
                 <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-white z-10">
-                    <div>
-                        <h2 className="text-lg font-extrabold text-slate-900">HowieAI</h2>
-                        <p className="text-xs font-semibold text-slate-500">Growth Assistant</p>
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-extrabold text-slate-900">HowieAI</h2>
+                            <p className="text-xs font-semibold text-slate-500">Growth Assistant</p>
+                        </div>
+                        <div className="text-[10px] font-semibold text-slate-400 mt-0.5 ml-0">
+                            {limit === Infinity ? (
+                                <span>Unlimited</span>
+                            ) : (
+                                <span>{remaining} / {limit} credits left</span>
+                            )}
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3">

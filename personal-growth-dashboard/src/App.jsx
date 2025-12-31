@@ -1,6 +1,7 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import EnvCheck from './components/EnvCheck';
 
 import DashboardLayout from './layouts/DashboardLayout';
 import LandingPage from './pages/LandingPage';
@@ -12,7 +13,8 @@ import CommandPalette from './components/CommandPalette';
 
 import FinancePage from './pages/FinancePage';
 import PricingPage from './pages/Pricing';
-import BillingSettings from './components/settings/BillingSettings';
+import BillingPage from './pages/BillingPage';
+import SettingsPage from './pages/SettingsPage';
 import useSubscription from './hooks/useSubscription';
 
 export default function App() {
@@ -29,13 +31,14 @@ export default function App() {
 
   // 3. Authenticated -> Dashboard Layout
   return (
-    <>
+    <EnvCheck>
       <CommandPalette />
       <Routes>
         <Route element={<DashboardLayout />}>
-          <Route path="/" element={<DailyOverview />} />
+          <Route path="/" element={<Navigate to="/overview" replace />} />
+          <Route path="/overview" element={<DailyOverview />} />
           <Route path="/schedule" element={<SchedulePage />} />
-          <Route path="/extra-up" element={<ExtraUp />} />
+          <Route path="/goals" element={<ExtraUp />} />
           <Route path="/chores" element={<ChoresPage />} />
           <Route path="/finance" element={<FinancePage />} />
           <Route
@@ -47,9 +50,10 @@ export default function App() {
               />
             }
           />
-          <Route path="/settings" element={<BillingSettings />} />
+          <Route path="/billing" element={<BillingPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
-    </>
+    </EnvCheck>
   );
 }

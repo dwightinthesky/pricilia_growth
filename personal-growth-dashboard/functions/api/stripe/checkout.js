@@ -10,6 +10,10 @@ export const onRequestPost = async ({ request, env }) => {
 
     try {
         const { uid, email } = await requireSupabaseUser(request, env);
+        const { plan } = await request.json().catch(() => ({}));
+
+        const priceId = plan === 'pro' ? env.STRIPE_PRICE_PRO : env.STRIPE_PRICE_PLUS;
+        if (!priceId) throw new Error("Price ID missing for plan: " + plan);
 
         const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
             apiVersion: "2024-06-20",
@@ -20,7 +24,7 @@ export const onRequestPost = async ({ request, env }) => {
         const session = await stripe.checkout.sessions.create({
             mode: "subscription",
             customer: customerId,
-            line_items: [{ price: env.STRIPE_PRICE_PLUS, quantity: 1 }],
+            line_items: [{ price: priceId, quantity: 1 }],
             subscription_data: {
                 metadata: { userId: uid }, // Use userId for Webhook
             },
